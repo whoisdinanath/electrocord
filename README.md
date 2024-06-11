@@ -17,7 +17,7 @@
 
 ## Usage
 
-After starting the server, open your web browser and navigate to `http://localhost:3000`. Register a new account or login to an existing one to start using ElectroCord.
+After starting the server, open your web browser and navigate to `http://localhost:8000`. Register a new account or login to an existing one to start using ElectroCord.
 
 ## Contributing
 
