@@ -13,7 +13,8 @@
     "express": "^4.19.2",
     "jsonwebtoken": "^9.0.2",
     "morgan": "~1.9.1",
-    "postgres": "^3.4.4"
+    "postgres": "^3.4.4",
+    "tld-extract": "^2.1.0"
   },
   "type": "module",
   "devDependencies": {

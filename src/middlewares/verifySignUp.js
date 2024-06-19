@@ -1,6 +1,7 @@
 import sql from '../database/db.js';
+import parser from 'tld-extract';
 
-const checkDuplicateUsernameOrEmail = async (req, res, next) => {
+export const checkDuplicateUsernameOrEmail = async (req, res, next) => {
     try {
         const { username, email } = req.body;
         const user = await sql`SELECT * FROM users WHERE username = ${username}`;
@@ -13,5 +14,15 @@ const checkDuplicateUsernameOrEmail = async (req, res, next) => {
     }
 }
 
+export const checkTcioeEmail = async (req, res, next) => {
+    try {
+        const { email } = req.body;
+        const address = email.split('@').pop()
+        if (address !== 'tcioe.edu.np') {
+            return res.status(400).json({message: 'You must use your edu email provided by the college.'});
+        }
+        next();
+    } catch (error) {   
+    }
+}
 
-export default checkDuplicateUsernameOrEmail;

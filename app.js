@@ -4,7 +4,6 @@ import { fileURLToPath } from 'url';
 import cookieParser from 'cookie-parser';
 import logger from 'morgan';
 
-import indexRouter from './src/routes/indexRoutes.js';
 import usersRouter from './src/routes/userRoutes.js';
 import authRouter from './src/routes/authRoutes.js';
 
@@ -19,7 +18,6 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.use('/', indexRouter);
 app.use('/api/v1/users', usersRouter);
 app.use('/api/v1/auth', authRouter);
 

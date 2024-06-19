@@ -3,10 +3,8 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 
 const signUp = async (req, res) => {
-    console.log("Hello");
     try {
         const { username, fullname, email, dob, password1, password2 } = req.body;
-        console.log(username, fullname, email, dob, password1, password2);
         if (password1 !== password2) return res.status(400).json({ message: 'Passwords do not match' });
         const hashedPassword = await bcrypt.hash(password1, 10);
         const newUser = await sql`INSERT INTO users (username, fullname, email, dob, password) VALUES (${username}, ${fullname}, ${email}, ${dob}, ${hashedPassword}) RETURNING *`;

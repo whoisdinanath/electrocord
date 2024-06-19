@@ -5,16 +5,19 @@
  */
 
 import app from '../app.js';
-import https from 'https';
 import http from 'http';
 import debug from 'debug';
-import fs from 'fs';
+import dotenv from 'dotenv';
 
 
 /**
  * Get port from environment and store in Express.
  */
-var port = normalizePort(process.env.PORT || '8000');
+
+dotenv.config();
+const PORT = process.env.PORT || 8000;
+
+var port = normalizePort(PORT);
 app.set('port', port);
 
 /**
