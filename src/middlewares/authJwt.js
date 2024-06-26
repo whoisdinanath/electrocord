@@ -21,8 +21,8 @@ const verifyToken = async (req, res, next) => {
 
 const isAdmin = async (req, res, next) => {
     try {
-        const user = await sql`SELECT * FROM users WHERE id = ${req.userId}`;
-        if (user[0].is_admin) {
+        const [user] = await sql`SELECT * FROM users WHERE id = ${req.userId}`;
+        if (user && user.is_admin) {
             next();
             return;
         }
@@ -35,8 +35,8 @@ const isAdmin = async (req, res, next) => {
 
 const isModerator = async (req, res, next) => {
     try {
-        const user = await sql`SELECT * FROM users WHERE id = ${req.userId}`;
-        if (user[0].is_moderator) {
+        const [user] = await sql`SELECT * FROM users WHERE id = ${req.userId}`;
+        if (user && user.is_moderator) {
             next();
             return;
         }

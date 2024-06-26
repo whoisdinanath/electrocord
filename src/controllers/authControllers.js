@@ -8,8 +8,14 @@ const signUp = async (req, res) => {
         if (password1 !== password2) return res.status(400).json({ message: 'Passwords do not match' });
         const hashedPassword = await bcrypt.hash(password1, 10);
         const newUser = await sql`INSERT INTO users (username, fullname, email, dob, password) VALUES (${username}, ${fullname}, ${email}, ${dob}, ${hashedPassword}) RETURNING *`;
-        const token = jwt.sign({ id: newUser[0].id }, process.env.SECRET, { expiresIn: 86400 });
-        res.status(200).json({ token });
+        const token = jwt.sign({ id: newUser[0].id }, process.env.SECRET, { expiresIn: 86400 }); // token expiry : 1 day
+        res.cookie('token', token, { 
+            path: "/", // accesible from all path
+            httpOnly: true, // can be accesed by client-side scripts
+            maxAge: 86400000 
+        }); /// cookie expires in a day
+        // Note: Add secure=true during production
+        res.status(200).json({ message: 'Signup successful' });
     }
     catch (error) {
         return res.status(400).json({ error: error.message });
@@ -24,7 +30,13 @@ const signIn = async (req, res) => {
         const passwordIsValid = await bcrypt.compare(password, user[0].password);
         if (!passwordIsValid) return res.status(401).json({ message: 'Invalid Password' });
         const token = jwt.sign({ id: user[0].id }, process.env.SECRET, { expiresIn: 86400 });
-        res.status(200).json({ token });
+        res.cookie('token', token, { 
+            path: "/", // accesible from all path
+            httpOnly: true, // can be accesed by client-side scripts
+            maxAge: 86400000 
+        }); /// cookie expires in a day
+        // Note: Add secure=true during production
+        res.status(200).json({ message: 'Signin successful'});
     }
     catch (error) {
         return res.status(400).json({ error: error.message });
