@@ -2,24 +2,27 @@ import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
 import sql from '../database/db.js';
 
-const verifyToken = async (req, res, next) => {
+export const verifyToken = async (req, res, next) => {
     dotenv.config();
     const { SECRET } = process.env;
     try {
         const token = req.headers['x-access-token'];
         if (!token) return res.status(403).json({ message: 'No token provided' });
-        const decoded = jwt.verify(token, SECRET, (err, decoded) => {
-            if (err) return res.status(401).json({ message: 'Unauthorized' });
-            return decoded; });
+
+        // Correctly handling jwt.verify synchronously
+        const decoded = jwt.verify(token, SECRET);
         req.userId = decoded.id;
         next();
-    }
-    catch (error) {
-        throw error;
+    } catch (error) {
+        if (error.name === 'JsonWebTokenError') {
+            return res.status(401).json({ message: 'Unauthorized' });
+        }
+        // Handle other errors differently if you like
+        return res.status(500).json({ message: 'Failed to authenticate token.' });
     }
 };
 
-const isAdmin = async (req, res, next) => {
+export const isAdmin = async (req, res, next) => {
     try {
         const [user] = await sql`SELECT * FROM users WHERE id = ${req.userId}`;
         if (user && user.is_admin) {
@@ -33,7 +36,7 @@ const isAdmin = async (req, res, next) => {
     }
 }
 
-const isModerator = async (req, res, next) => {
+export const isModerator = async (req, res, next) => {
     try {
         const [user] = await sql`SELECT * FROM users WHERE id = ${req.userId}`;
         if (user && user.is_moderator) {
@@ -46,12 +49,4 @@ const isModerator = async (req, res, next) => {
         throw error;
     }
 }
-
-const authJwt = {
-    verifyToken,
-    isAdmin,
-    isModerator
-}
-
-export default authJwt;
 

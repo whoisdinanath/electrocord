@@ -21,8 +21,24 @@ CREATE TABLE users (
   is_admin BOOLEAN DEFAULT FALSE,
   is_moderator BOOLEAN DEFAULT FALSE,
   is_active BOOLEAN DEFAULT TRUE,
-  created_at TIMESTAMP DEFAULT NOW()
+  created_at TIMESTAMP DEFAULT NOW(),
+  updated_at TIMESTAMP DEFAULT NOW()
 );
+
+CREATE OR REPLACE FUNCTION update_timestamp()
+RETURNS TRIGGER AS $$
+BEGIN
+  NEW.updated_at = NOW();
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE TRIGGER set_updated_at
+BEFORE UPDATE ON users
+FOR EACH ROW
+EXECUTE FUNCTION update_timestamp();
+
 
 CREATE TABLE otp (
   otp_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -33,28 +49,50 @@ CREATE TABLE otp (
 );
 
 CREATE TABLE chats (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4()
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  name VARCHAR(255) NOT NULL DEFAULT 'General',
+  type VARCHAR(255) NOT NULL CHECK(type IN ('audio', 'text')),
+  description TEXT,
+  category VARCHAR(255) NOT NULL CHECK (category IN ('general', 'subject')),
+  created_at TIMESTAMP DEFAULT NOW(),
+  updated_at TIMESTAMP DEFAULT NOW()
 );
+
 
 CREATE TABLE messages (
     message_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     chat_id UUID NOT NULL REFERENCES chats(id) ON DELETE CASCADE,
     user_id UUID NOT NULL REFERENCES users(user_id) ON DELETE SET NULL,
     message TEXT NOT NULL,
-    created_at TIMESTAMP DEFAULT NOW()
+    created_at TIMESTAMP DEFAULT NOW(),
+    updated_at TIMESTAMP DEFAULT NOW()
 );
 
-CREATE TABLE general_chats (
-    chat_id UUID PRIMARY KEY REFERENCES chats(id) ON DELETE CASCADE,
-    chat_name VARCHAR(255) NOT NULL,
+CREATE TRIGGER set_updated_at
+BEFORE UPDATE ON messages
+FOR EACH ROW
+EXECUTE FUNCTION update_timestamp();
+
+
+CREATE TABLE general_chat (
+    chat_id UUID PRIMARY KEY REFERENCES chats(id),
+    chat_category VARCHAR(255) NOT NULL CHECK(chat_category IN ('general', 'private', 'announcement', 'group')),
     created_at TIMESTAMP DEFAULT NOW()
 );
 
 CREATE TABLE semesters (
     semester_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     semester INT NOT NULL CHECK (semester > 0 AND semester < 9),
-    description TEXT NOT NULL
+    description TEXT NOT NULL,
+    created_at TIMESTAMP DEFAULT NOW(),
+    updated_at TIMESTAMP DEFAULT NOW()
 );
+
+CREATE TRIGGER set_updated_at
+BEFORE UPDATE ON semesters
+FOR EACH ROW
+EXECUTE FUNCTION update_timestamp();
+
 
 CREATE TABLE subject (
     subject_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -62,8 +100,16 @@ CREATE TABLE subject (
     semester_id UUID NOT NULL REFERENCES semesters(semester_id) ON DELETE CASCADE,
     syllabus TEXT NOT NULL,
     description TEXT NOT NULL,
-    chat_id UUID NOT NULL UNIQUE REFERENCES chats(id) -- Corrected line
+    chat_id UUID NOT NULL UNIQUE REFERENCES chats(id), -- Corrected line
+    created_at TIMESTAMP DEFAULT NOW(),
+    updated_at TIMESTAMP DEFAULT NOW()
 );
+
+CREATE TRIGGER set_updated_at
+BEFORE UPDATE ON subject
+FOR EACH ROW
+EXECUTE FUNCTION update_timestamp();
+
 
 CREATE TABLE resources (
     resource_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -72,8 +118,14 @@ CREATE TABLE resources (
     description TEXT NOT NULL,
     category VARCHAR(255) NOT NULL CHECK (category IN ('Notes', 'PQ', 'Assignments', 'Links', 'Others')),
     file_path VARCHAR(255) NOT NULL,
-    created_at TIMESTAMP DEFAULT NOW()
+    created_at TIMESTAMP DEFAULT NOW(),
+    updated_at TIMESTAMP DEFAULT NOW()
 );
+
+CREATE TRIGGER set_updated_at
+BEFORE UPDATE ON resources
+FOR EACH ROW
+EXECUTE FUNCTION update_timestamp();
 
 CREATE TABLE routines (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -84,5 +136,11 @@ CREATE TABLE routines (
     teacher VARCHAR(255) NOT NULL,
     start_time TIME NOT NULL,
     end_time TIME NOT NULL,
-    created_at TIMESTAMP DEFAULT NOW()
+    created_at TIMESTAMP DEFAULT NOW(),
+    updated_at TIMESTAMP DEFAULT NOW()
 );
+
+CREATE TRIGGER set_updated_at
+BEFORE UPDATE ON routines
+FOR EACH ROW
+EXECUTE FUNCTION update_timestamp();

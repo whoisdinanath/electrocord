@@ -1,5 +1,4 @@
 import sql from '../database/db.js';
-import parser from 'tld-extract';
 
 export const checkDuplicateUsernameOrEmail = async (req, res, next) => {
     try {
