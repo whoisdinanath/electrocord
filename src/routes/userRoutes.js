@@ -1,9 +1,10 @@
 import express from 'express';
 import { getUsers, getUserById } from '../controllers/userControllers.js';
+import { verifyToken } from '../middlewares/authJwt.js';
 
 var router = express.Router();
 
-router.get('/', getUsers);
-router.get('/:id', getUserById);
+router.get('/', verifyToken, getUsers);
+router.get('/:id', verifyToken, getUserById);
 
 export default router;

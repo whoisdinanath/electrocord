@@ -6,10 +6,10 @@ var router = express.Router();
 router.get('/',  verifyToken, getSemesters);
 router.get('/:id', verifyToken, getSemesterById);
 router.post('/', verifyToken, (req, res, next) => {
-    if (isAdmin(req)) {
+    if (isAdmin(req, res, next)) {
         return createSemester(req, res, next);
     }
-    if (isModerator(req)) {
+    if (isModerator(req, res,next)) {
         return createSemester(req, res, next);
     } else {
         return res.status(403).send({ message: "Require Admin or Moderator Role!" });

@@ -1,14 +1,18 @@
 import sql from '../database/db.js';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 const signUp = async (req, res) => {
     try {
-        const { username, fullname, email, dob, password1, password2 } = req.body;
+        const { username, fullname, email, dob, password1, password2, is_admin=false, is_moderator=false } = req.body;
         if (password1 !== password2) return res.status(400).json({ message: 'Passwords do not match' });
         const hashedPassword = await bcrypt.hash(password1, 10);
-        const newUser = await sql`INSERT INTO users (username, fullname, email, dob, password) VALUES (${username}, ${fullname}, ${email}, ${dob}, ${hashedPassword}) RETURNING *`;
-        const token = jwt.sign({ id: newUser[0].id }, process.env.SECRET, { expiresIn: 86400 }); // token expiry : 1 day
+        const newUser = await sql`INSERT INTO users (username, fullname, email, dob, password, is_admin, is_moderator) VALUES (${username}, ${fullname}, ${email}, ${dob}, ${hashedPassword}, ${is_admin}, ${is_moderator}) RETURNING *`;
+        const token = jwt.sign({ id: newUser[0].user_id }, process.env.SECRET, { 
+        expiresIn: 86400 }); // token expiry : 1 day
         res.cookie('token', token, { 
             path: "/", // accesible from all path
             httpOnly: true, // can be accesed by client-side scripts
@@ -29,7 +33,8 @@ const signIn = async (req, res) => {
         if (!user.length) return res.status(404).json({ message: 'User Not Found' });
         const passwordIsValid = await bcrypt.compare(password, user[0].password);
         if (!passwordIsValid) return res.status(401).json({ message: 'Invalid Password' });
-        const token = jwt.sign({ id: user[0].id }, process.env.SECRET, { expiresIn: 86400 });
+        const token = jwt.sign({ id: user[0].user_id }, process.env.SECRET, { expiresIn: 86400 });
+
         res.cookie('token', token, { 
             path: "/", // accesible from all path
             httpOnly: true, // can be accesed by client-side scripts
