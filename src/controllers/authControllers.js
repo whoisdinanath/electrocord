@@ -2,6 +2,7 @@ import sql from '../database/db.js';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
+import { ApiError, ApiResponse } from '../utils/sendResponse.js';
 
 dotenv.config();
 
@@ -19,10 +20,10 @@ const signUp = async (req, res) => {
             maxAge: 86400000 
         }); /// cookie expires in a day
         // Note: Add secure=true during production
-        res.status(200).json({ message: 'Signup successful' });
+        res.status(200).json(new ApiResponse(200, 'User created successfully', newUser));
     }
     catch (error) {
-        return res.status(400).json({ error: error.message });
+        return res.status(400).json(new ApiError(400, error.message));
     }
 };
 
@@ -41,10 +42,10 @@ const signIn = async (req, res) => {
             maxAge: 86400000 
         }); /// cookie expires in a day
         // Note: Add secure=true during production
-        res.status(200).json({ message: 'Signin successful'});
+        res.status(200).json(new ApiResponse(200, 'User signed in successfully', user));
     }
     catch (error) {
-        return res.status(400).json({ error: error.message });
+        return res.status(400).json(new ApiError(400, error.message));
     }
 }
 

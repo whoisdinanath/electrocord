@@ -1,5 +1,6 @@
 import { photoContainer, videoContainer, audioContainer, documentContainer, otherContainer } from './azureBlob.js';
 import fs from 'fs';
+import { ApiError, ApiResponse } from '../utils/sendResponse.js';
 
 export const uploadToAzure = async (req, res) => {
     if (!req.files) {
@@ -57,12 +58,10 @@ export const uploadToAzure = async (req, res) => {
 
     try {
         const urls = await Promise.all(uploadPromises);
-        res.send({ message: 'Files uploaded successfully.', urls });
-        return urls;
+        res.status(200).json(new ApiResponse(200, 'Files uploaded successfully', urls));
     } catch (error) {
-        res.status(500).send({ message: error.message });
-    }
-    
+        res.status(error.statusCode || 500).json(new ApiError(error.statusCode || 500, error.message));
+    }  
 };
 
 
