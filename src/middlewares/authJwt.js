@@ -11,7 +11,6 @@ export const verifyToken = async (req, res, next) => {
         if (!token) return res.status(403).json({ message: 'No token provided' });
 
         const decoded = jwt.verify(token, SECRET);
-        console.log(decoded.id)
         req.userId = decoded.id;
         next();
     } catch (error) {

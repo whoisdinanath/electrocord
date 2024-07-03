@@ -9,6 +9,8 @@ import usersRouter from './src/routes/userRoutes.js';
 import authRouter from './src/routes/authRoutes.js';
 import semesterRouter from './src/routes/semesterRoutes.js';
 import testRouter from './src/routes/testRoutes.js'
+import chatRouter from './src/routes/chatRoutes.js';
+import messageRouter from './src/routes/messageRoutes.js';
 
 var app = express();
 app.use(cookieParser());
@@ -27,6 +29,8 @@ app.use('/api/v1/users', usersRouter);
 app.use('/api/v1/auth', authRouter);
 app.use('/api/v1/semesters', semesterRouter);
 app.use('/api/v1/test', testRouter);
+app.use('/api/v1/chats', chatRouter);
+app.use('/api/v1/messages', messageRouter);
 
 
 export default app;

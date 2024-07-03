@@ -42,10 +42,14 @@ const signIn = async (req, res) => {
             maxAge: 86400000 
         }); /// cookie expires in a day
         // Note: Add secure=true during production
-        res.status(200).json(new ApiResponse(200, 'User signed in successfully', user));
+        const tokenDetails = {
+            token,
+            expiresIn: 86400
+        }
+        res.status(200).json(new ApiResponse(200, 'User signed in successfully', tokenDetails));
     }
     catch (error) {
-        return res.status(400).json(new ApiError(400, error.message));
+        return res.status(400).json(new ApiError(400, 'Signin failed', [error.message]));
     }
 }
 

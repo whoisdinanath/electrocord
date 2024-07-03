@@ -18,6 +18,7 @@ CREATE TABLE users (
   email VARCHAR(255) NOT NULL,
   dob DATE NOT NULL CHECK (dob <= CURRENT_DATE),
   password VARCHAR(255) NOT NULL,
+  profile_pic VARCHAR(255),
   is_admin BOOLEAN DEFAULT FALSE,
   is_moderator BOOLEAN DEFAULT FALSE,
   is_active BOOLEAN DEFAULT TRUE,
@@ -55,15 +56,17 @@ CREATE TABLE chats (
   description TEXT,
   category VARCHAR(255) NOT NULL CHECK (category IN ('general', 'subject')),
   created_at TIMESTAMP DEFAULT NOW(),
-  updated_at TIMESTAMP DEFAULT NOW()
+  updated_at TIMESTAMP DEFAULT NOW(),
+  UNIQUE(name, category)
 );
 
 
 CREATE TABLE messages (
     message_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     chat_id UUID NOT NULL REFERENCES chats(id) ON DELETE CASCADE,
-    user_id UUID NOT NULL REFERENCES users(user_id) ON DELETE SET NULL,
+    sender_id UUID NOT NULL REFERENCES users(user_id) ON DELETE SET NULL,
     message TEXT NOT NULL,
+    attachments VARCHAR(255) ARRAY,
     created_at TIMESTAMP DEFAULT NOW(),
     updated_at TIMESTAMP DEFAULT NOW()
 );
@@ -82,7 +85,7 @@ CREATE TABLE general_chat (
 
 CREATE TABLE semesters (
     semester_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    semester INT NOT NULL CHECK (semester > 0 AND semester < 9),
+    semester INT UNIQUE NOT NULL CHECK (semester > 0 AND semester < 9),
     description TEXT NOT NULL,
     created_at TIMESTAMP DEFAULT NOW(),
     updated_at TIMESTAMP DEFAULT NOW()
@@ -100,7 +103,7 @@ CREATE TABLE subject (
     semester_id UUID NOT NULL REFERENCES semesters(semester_id) ON DELETE CASCADE,
     syllabus TEXT NOT NULL,
     description TEXT NOT NULL,
-    chat_id UUID NOT NULL UNIQUE REFERENCES chats(id), -- Corrected line
+    chat_id UUID NOT NULL UNIQUE REFERENCES chats(id), 
     created_at TIMESTAMP DEFAULT NOW(),
     updated_at TIMESTAMP DEFAULT NOW()
 );
