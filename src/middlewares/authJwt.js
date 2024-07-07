@@ -11,7 +11,7 @@ export const verifyToken = async (req, res, next) => {
         if (!token) return res.status(403).json({ message: 'No token provided' });
 
         const decoded = jwt.verify(token, SECRET);
-        req.userId = decoded.id;
+        req.userId = decoded.user_id;
         next();
     } catch (error) {
         if (error.name === 'JsonWebTokenError') {

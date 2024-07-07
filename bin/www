@@ -8,7 +8,7 @@ import http from 'http';
 import debugLib from 'debug'; // Changed
 import dotenv from 'dotenv';
 import { Server } from 'socket.io';
-import { socketConnection } from '../src/sockets/socketHandler.js'; // Moved
+import { initializeSockets } from '../src/sockets/socketManager.js';
 
 const debug = debugLib('http'); // Initialized
 
@@ -24,17 +24,13 @@ app.set('port', port);
  * Create HTTP server.
  */
 var server = http.createServer(app);
-const io = new Server(server, {
-  cors: {
-    origin: '*', // Consider specifying domains for production
-  }
-});
+
+// Initialize socket.io
+initializeSockets(server);
 
 /**
  * Listen on provided port, on all network interfaces.
  */
-io.on('connection', socketConnection);
-
 server.listen(port);
 server.on('error', onError);
 server.on('listening', onListening);

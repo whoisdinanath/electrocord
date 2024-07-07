@@ -1,12 +1,14 @@
 DROP TABLE IF EXISTS routines;
 DROP TABLE IF EXISTS resources;
+DROP TABLE IF EXISTS message_attachments;
 DROP TABLE IF EXISTS messages;
 DROP TABLE IF EXISTS general_chats;
-DROP TABLE IF EXISTS subject;
+DROP TABLE IF EXISTS subjects;
 DROP TABLE IF EXISTS chats;
 DROP TABLE IF EXISTS otp;
 DROP TABLE IF EXISTS users;
 DROP TABLE IF EXISTS semesters;
+
 
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
@@ -49,6 +51,19 @@ CREATE TABLE otp (
   expires_at TIMESTAMP DEFAULT NOW() + INTERVAL '10 minutes'
 );
 
+CREATE OR REPLACE FUNCTION delete_unused_otp()
+RETURNS TRIGGER AS $$
+BEGIN
+  DELETE FROM otp WHERE expires_at < NOW();
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER delete_unused_otp
+BEFORE INSERT ON otp
+FOR EACH ROW
+EXECUTE FUNCTION delete_unused_otp();
+
 CREATE TABLE chats (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   name VARCHAR(255) NOT NULL DEFAULT 'General',
@@ -66,7 +81,6 @@ CREATE TABLE messages (
     chat_id UUID NOT NULL REFERENCES chats(id) ON DELETE CASCADE,
     sender_id UUID NOT NULL REFERENCES users(user_id) ON DELETE SET NULL,
     message TEXT NOT NULL,
-    attachments VARCHAR(255) ARRAY,
     created_at TIMESTAMP DEFAULT NOW(),
     updated_at TIMESTAMP DEFAULT NOW()
 );
@@ -77,16 +91,16 @@ FOR EACH ROW
 EXECUTE FUNCTION update_timestamp();
 
 
-CREATE TABLE general_chat (
+CREATE TABLE general_chats (
     chat_id UUID PRIMARY KEY REFERENCES chats(id),
-    chat_category VARCHAR(255) NOT NULL CHECK(chat_category IN ('general', 'private', 'announcement', 'group')),
+    general_category VARCHAR(255) NOT NULL CHECK(general_category IN ('general', 'private', 'announcement', 'group')),
     created_at TIMESTAMP DEFAULT NOW()
 );
 
 CREATE TABLE semesters (
     semester_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     semester INT UNIQUE NOT NULL CHECK (semester > 0 AND semester < 9),
-    description TEXT NOT NULL,
+    description TEXT,
     created_at TIMESTAMP DEFAULT NOW(),
     updated_at TIMESTAMP DEFAULT NOW()
 );
@@ -97,28 +111,28 @@ FOR EACH ROW
 EXECUTE FUNCTION update_timestamp();
 
 
-CREATE TABLE subject (
+CREATE TABLE subjects (
     subject_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    name VARCHAR(255) NOT NULL,
+    name VARCHAR(255) NOT NULL UNIQUE,
     semester_id UUID NOT NULL REFERENCES semesters(semester_id) ON DELETE CASCADE,
-    syllabus TEXT NOT NULL,
-    description TEXT NOT NULL,
+    syllabus TEXT,
+    description TEXT,
     chat_id UUID NOT NULL UNIQUE REFERENCES chats(id), 
     created_at TIMESTAMP DEFAULT NOW(),
     updated_at TIMESTAMP DEFAULT NOW()
 );
 
 CREATE TRIGGER set_updated_at
-BEFORE UPDATE ON subject
+BEFORE UPDATE ON subjects
 FOR EACH ROW
 EXECUTE FUNCTION update_timestamp();
 
 
 CREATE TABLE resources (
     resource_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    subject_id UUID NOT NULL REFERENCES subject(subject_id) ON DELETE CASCADE,
+    subject_id UUID NOT NULL REFERENCES subjects(subject_id) ON DELETE CASCADE,
     name VARCHAR(255) NOT NULL,
-    description TEXT NOT NULL,
+    description TEXT,
     category VARCHAR(255) NOT NULL CHECK (category IN ('Notes', 'PQ', 'Assignments', 'Links', 'Others')),
     file_path VARCHAR(255) NOT NULL,
     created_at TIMESTAMP DEFAULT NOW(),
@@ -132,7 +146,7 @@ EXECUTE FUNCTION update_timestamp();
 
 CREATE TABLE routines (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    subject_id UUID NOT NULL REFERENCES subject(subject_id) ON DELETE CASCADE,
+    subject_id UUID NOT NULL REFERENCES subjects(subject_id) ON DELETE CASCADE,
     day VARCHAR(255) NOT NULL CHECK (day IN ('Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday')),
     category VARCHAR(255) NOT NULL CHECK (category IN ('Lecture', 'Lab', 'Assessment')),
     grp VARCHAR(255) NOT NULL CHECK (grp IN ('A', 'B', 'Both')),
@@ -147,3 +161,22 @@ CREATE TRIGGER set_updated_at
 BEFORE UPDATE ON routines
 FOR EACH ROW
 EXECUTE FUNCTION update_timestamp();
+
+
+
+CREATE TABLE message_attachments (
+    attachment_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    message_id UUID NOT NULL REFERENCES messages(message_id) ON DELETE CASCADE,
+    original_name VARCHAR(255) NOT NULL,
+    uploaded_name VARCHAR(255) NOT NULL,
+    file_path VARCHAR(255) NOT NULL,
+    file_type VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP DEFAULT NOW(),
+    updated_at TIMESTAMP DEFAULT NOW()
+);
+
+CREATE TRIGGER set_updated_at
+BEFORE UPDATE ON message_attachments
+FOR EACH ROW
+EXECUTE FUNCTION update_timestamp();
+

@@ -27,8 +27,17 @@ export const createChat = async(req, res) => {
         if (!name || !type || !category) {
             return res.status(400).json({message: 'Name, Type and Category are required'});
         }
-        const created = await sql`INSERT INTO chats (name, type, description, category) VALUES (${name}, ${type}, ${description}, ${category})`;
-        res.status(201).json(new ApiResponse(201, 'Chat created successfully'));
+        const chat = await sql`INSERT INTO chats (name, type, description, category) VALUES (${name}, ${type}, ${description}, ${category}) RETURNING *`;
+
+        if (category === 'general') {
+            const { general_category } = req.body;
+            if (!general_category) {
+                return res.status(400).json({message: 'General category is required for general chat'});
+            }
+            const chat_id = chat[0].id;
+            await sql`INSERT INTO general_chats (chat_id, general_category) VALUES (${chat_id}, ${general_category})`;
+        }
+        res.status(201).json(new ApiResponse(201, 'Chat created successfully', chat));
     }
     catch (error) {
         throw error;
