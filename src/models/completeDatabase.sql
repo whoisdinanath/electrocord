@@ -12,6 +12,30 @@ DROP TABLE IF EXISTS semesters;
 
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
+CREATE OR REPLACE FUNCTION update_timestamp()
+RETURNS TRIGGER AS $update_timestamp$
+BEGIN
+  NEW.updated_at = NOW();
+  RETURN NEW;
+END;
+$update_timestamp$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION delete_unused_otp()
+RETURNS TRIGGER AS $delete_otp$
+BEGIN
+  DELETE FROM otp WHERE expires_at < NOW();
+  RETURN NEW;
+END;
+$delete_otp$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION delete_chat_before_subject()
+RETURNS TRIGGER AS $clean_chat$
+BEGIN
+  DELETE FROM chats WHERE id=NEW.chat_id;
+  RETURN NEW;
+END;
+$clean_chat$ LANGUAGE plpgsql;
+
 
 CREATE TABLE users (
   user_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -28,13 +52,6 @@ CREATE TABLE users (
   updated_at TIMESTAMP DEFAULT NOW()
 );
 
-CREATE OR REPLACE FUNCTION update_timestamp()
-RETURNS TRIGGER AS $$
-BEGIN
-  NEW.updated_at = NOW();
-  RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
 
 
 CREATE TRIGGER set_updated_at
@@ -51,13 +68,7 @@ CREATE TABLE otp (
   expires_at TIMESTAMP DEFAULT NOW() + INTERVAL '10 minutes'
 );
 
-CREATE OR REPLACE FUNCTION delete_unused_otp()
-RETURNS TRIGGER AS $$
-BEGIN
-  DELETE FROM otp WHERE expires_at < NOW();
-  RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
+
 
 CREATE TRIGGER delete_unused_otp
 BEFORE INSERT ON otp
@@ -121,6 +132,11 @@ CREATE TABLE subjects (
     created_at TIMESTAMP DEFAULT NOW(),
     updated_at TIMESTAMP DEFAULT NOW()
 );
+
+CREATE TRIGGER clean_subject_chat
+BEFORE DELETE ON subjects
+FOR EACH ROW
+EXECUTE FUNCTION delete_chat_before_subject();
 
 CREATE TRIGGER set_updated_at
 BEFORE UPDATE ON subjects

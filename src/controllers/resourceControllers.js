@@ -5,9 +5,9 @@ import { uploadToAzure } from "../utils/azureUpload.js";
 export const getResources = async (req, res) => {
     try {
         const resources = await sql`SELECT * FROM resources`;
-        res.status(200).json(new ApiResponse(200, "Resources fetched successfully", resources));
+        return res.status(200).json(new ApiResponse(200, "Resources fetched successfully", resources));
     } catch (error) {
-        throw error;
+        return res.status(500).json(new ApiError(500, "An error occurred while fetching resources", [error.message]));
     }
 }
 
@@ -15,9 +15,9 @@ export const getResourceById = async (req, res) => {
     try {
         const { id } = req.params;
         const resource = await sql`SELECT * FROM resources WHERE resource_id = ${id}`;
-        res.status(200).json(new ApiResponse(200, "Resource fetched successfully", resource));
+        return res.status(200).json(new ApiResponse(200, "Resource fetched successfully", resource));
     } catch (error) {
-        throw error;
+        return res.status(500).json(new ApiError(500, "An error occurred while fetching resource", [error.message]));
     }
 }
 
@@ -36,10 +36,10 @@ export const createResource = async (req, res) => {
             return res.status(400).json({message: 'Error uploading resource'});
         }
         const result = await sql`INSERT INTO resources (subject_id, name, description, category, file_path ) VALUES (${subject_id}, ${name}, ${description}, ${category}, ${resourceUrl}) RETURNING *`;
-        res.status(201).json(new ApiResponse(201, 'Resource created successfully', result));
+        return res.status(201).json(new ApiResponse(201, 'Resource created successfully', result));
     }
     catch (error) {
-        throw error;
+        return res.status(500).json(new ApiError(500, 'An error occurred while creating the resource', [error.message]));
     }
 }
 
@@ -51,7 +51,7 @@ export const updateResource = async (req, res) => {
         console.log(id, fieldsToUpdate);
         // validate the inputs 
         if (!id || Object.keys(fieldsToUpdate).length === 0) {
-            return res.status(400).json({message: 'ID and at least one field to update are required'});
+            return res.status(400).json(new ApiError(400, 'ID and at least one field to update are required'));
         }
 
         // if there's a file in request, upload it to azure and update the file path
@@ -67,10 +67,11 @@ export const updateResource = async (req, res) => {
           }
           where resource_id = ${id}
         `;
-
-        res.status(200).json({message: 'Resource updated successfully'});
+        return res.status(200).json(new ApiResponse(200, 'Resource updated successfully'));
     } catch (error) {
         throw error;
+    } finally {
+        return res.status(500).json(new ApiError(500, 'An error occurred while updating the resource', [error.message]));
     }
 }
 
@@ -86,5 +87,19 @@ export const deleteResource = async (req, res) => {
         res.status(200).json({message: 'Resource deleted successfully'});
     } catch (error) {
         throw error;
+    }
+
+    try {
+        const { id } = req.params;
+        if (!id) {
+            return res.status(400).json({message: 'ID is required'});
+        }
+        await sql`DELETE FROM resources WHERE resource_id = ${id}`;
+        return res.status(200).json(new ApiResponse(200, 'Resource deleted successfully'));
+    }
+    catch (error) {
+        throw error;
+    } finally {
+        return res.status(500).json(new ApiError(500, 'An error occurred while deleting the resource', [error.message]));
     }
 }

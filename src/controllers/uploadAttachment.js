@@ -4,8 +4,8 @@ import { ApiError, ApiResponse } from "../utils/sendResponse.js";
 export const uploadAttachment = async (req, res) => {
     try {
         const uploadedFiles = await uploadToAzure(req);
-        res.status(200).json(new ApiResponse(200, 'Files uploaded successfully', uploadedFiles));
+        return res.status(200).json(new ApiResponse(200, 'Files uploaded successfully', uploadedFiles));
     } catch (error) {
-        throw error;
+        return res.status(500).json(new ApiError(500, 'An error occurred while uploading files', [error.message]));
     }
 };

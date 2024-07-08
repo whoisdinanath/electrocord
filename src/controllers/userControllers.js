@@ -14,8 +14,8 @@ export const getUserById = async (req, res) => {
     try {
         const { id } = req.params;
         const user = await sql`SELECT user_id, username, email, dob FROM users WHERE user_id = ${id}`;
-        res.status(200).json(new ApiResponse(200, 'User fetched successfully', user));
+        return res.status(200).json(new ApiResponse(200, 'User fetched successfully', user));
     } catch (error) {
-        throw error;
+        return res.status(500).json(new ApiError(500, 'An error occurred while fetching user', [error.message]));
     }
 }

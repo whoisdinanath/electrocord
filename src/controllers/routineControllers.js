@@ -4,9 +4,9 @@ import { ApiError, ApiResponse } from "../utils/sendResponse.js";
 export const getRoutines = async (req, res) => {
     try {
         const routines = await sql`SELECT * FROM routines`;
-        res.status(200).json(new ApiResponse(200, "Routines fetched successfully", routines));
+        return res.status(201).json(new ApiResponse(201, "Routines fetched successfully", routines));
     } catch (error) {
-        throw error;
+        res.status(500).json(new ApiError(500, "An error occurred while fetching routines", [error.message]));
     }
 }
 
@@ -14,9 +14,9 @@ export const getRoutineById = async (req, res) => {
     try {
         const { id } = req.params;
         const routine = await sql`SELECT * FROM routines WHERE id = ${id}`;
-        res.status(200).json(new ApiResponse(200, "Routine fetched successfully", routine));
+        return res.status(201).json(new ApiResponse(201, "Routine fetched successfully", routine));
     } catch (error) {
-        throw error;
+        res.status(500).json(new ApiError(500, "An error occurred while fetching routine", [error.message]));
     }
 }
 
@@ -30,9 +30,9 @@ export const createRoutine = async (req, res) => {
         }
         const result = await sql`INSERT INTO routines (subject_id, day, grp, category, teacher, start_time, end_time, room_no) VALUES (${subject_id}, ${day}, ${grp}, ${category}, ${teacher}, ${start_time}, ${end_time}, ${room_no}) RETURNING *`;
 
-        res.status(201).json(new ApiResponse(201, 'Routine created successfully', result));
+        return res.status(201).json(new ApiResponse(201, 'Routine created successfully', result));
     } catch (error) {
-        throw error;
+        res.status(500).json(new ApiError(500, 'An error occurred while creating the routine', [error.message]));
     }
 }
 
@@ -52,9 +52,9 @@ export const updateRoutine = async (req, res) => {
           where id = ${id}
         `;
 
-        res.status(200).json({message: 'Routine updated successfully'});
+        return res.status(201).json({message: 'Routine updated successfully'});
     } catch (error) {
-        throw error;
+        return  res.status(500).json({message: 'An error occurred while updating the routine', error: error.message});
     }
 }
 
@@ -65,8 +65,8 @@ export const deleteRoutine = async (req, res) => {
             return res.status(400).json({message: 'ID is required'});
         }
         await sql`DELETE FROM routines WHERE id = ${id}`;
-        res.status(200).json({message: 'Routine deleted successfully'});
+        return res.status(201).json({message: 'Routine deleted successfully'});
     } catch (error) {
-        throw error;
+        res.status(500).json(new ApiError(500, 'An error occurred while deleting the routine', [error.message]));
     }
 }

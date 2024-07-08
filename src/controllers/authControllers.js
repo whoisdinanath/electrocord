@@ -14,9 +14,29 @@ const signUp = async (req, res) => {
         const hashedPassword = await bcrypt.hash(password1, salt);
         const newUser = await sql`INSERT INTO users (username, fullname, email, dob, password, is_admin, is_moderator) VALUES (${username}, ${fullname}, ${email}, ${dob}, ${hashedPassword}, ${is_admin}, ${is_moderator}) RETURNING *`;
         // Note: Add secure=true during production
-        res.status(200).json(new ApiResponse(200, 'User created successfully', newUser));
-    }
-    catch (error) {
+        if (!newUser || !newUser.length === 0) throw new Error('User not created');
+        const token = jwt.sign({ user_id: newUser[0].user_id, 
+            email: newUser[0].email,
+            username: newUser[0].username,
+            is_admin: newUser[0].is_admin,
+            is_moderator: newUser[0].is_moderator,
+            profile_pic: newUser[0].profile_pic
+         }, process.env.SECRET, { expiresIn: 86400 });
+        res.cookie('token', token, { 
+            path: "/", // accesible from all path
+            httpOnly: true, // can be accesed by client-side scripts
+            maxAge: 86400000,
+            secure: true,
+            // signed: true, // unable to parse cookie using this currently
+            SameSite: 'None'
+        }); /// cookie expires in a day
+        console.log(newUser);
+        return res.status(201).json(new ApiResponse(201, 'User created successfully', {
+            token: token,
+        }));
+    }    
+        catch (error) {
+        console.log(error);
         return res.status(400).json(new ApiError(400, error.message));
     }
 };
@@ -25,9 +45,9 @@ const signIn = async (req, res) => {
     try {
         const { email, password } = req.body;
         const user = await sql`SELECT * FROM users WHERE email = ${email}`;
-        if (!user.length) return res.status(404).json({ message: 'User Not Found' });
+        if (!user.length) return res.status(404).json(new ApiError(404, 'User not found'));
         const passwordIsValid = await bcrypt.compare(password, user[0].password);
-        if (!passwordIsValid) return res.status(401).json({ message: 'Invalid Password' });
+        if (!passwordIsValid) return res.status(401).json(new ApiError(401, 'Invalid Password'));
         const token = jwt.sign({ user_id: user[0].user_id, 
             email: user[0].email,
             username: user[0].username,
@@ -49,7 +69,7 @@ const signIn = async (req, res) => {
             token,
             expiresIn: 86400
         }
-        res.status(200).json(new ApiResponse(200, 'User signed in successfully', tokenDetails));
+        return res.status(200).json(new ApiResponse(200, 'User signed in successfully', tokenDetails));
     }
     catch (error) {
         return res.status(400).json(new ApiError(400, 'Signin failed', [error.message]));

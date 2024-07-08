@@ -3,20 +3,20 @@ import { ApiError, ApiResponse } from '../utils/sendResponse.js';
 
 export const getChats = async(req, res) => {
     try {
-        const chats = await sql`SELECT * FROM chats`;
-        res.status(200).json(new ApiResponse(200, 'Chats fetched successfully', chats));
+        const chats = await sql`SELECT c.id, c.name, c.type, c.description, c.category, g.general_category, c.created_At, c.updated_at FROM chats c LEFT JOIN general_chats g ON c.id=g.chat_id;`;
+        return res.status(200).json(new ApiResponse(200, 'Chats fetched successfully', chats));
     } catch (error) {
-        throw error;
+        return res.status(500).json(new ApiError(500, 'An error occurred while fetching chats', [error.message]));
     }
 }
 
 export const getChatById = async(req, res) => {
     try {
         const { id } = req.params;
-        const chat = await sql`SELECT * FROM chats WHERE id = ${id}`;
+        const chat = await sql`SELECT c.id, c.name, c.type, c.description, c.category, g.general_category, c.created_At, c.updated_at FROM chats c LEFT JOIN general_chats g ON c.id=g.chat_id WHERE id = ${id}`;
         res.status(200).json(new ApiResponse(200, 'Chat fetched successfully', chat));
     } catch (error) {
-        throw error;
+        res.status(500).json(new ApiError(500, 'An error occurred while fetching chat', [error.message]));
     }
 }
 
@@ -40,7 +40,7 @@ export const createChat = async(req, res) => {
         res.status(201).json(new ApiResponse(201, 'Chat created successfully', chat));
     }
     catch (error) {
-        throw error;
+        return res.status(500).json(new ApiError(500, 'An error occurred while creating the chat', [error.message]));
     }
 }
 
@@ -63,9 +63,11 @@ export const updateChat = async(req, res) => {
           where id = ${id}
         `;
 
-        res.status(200).json({message: 'Chat updated successfully'});
-    } catch (error) {
-        res.status(500).json({message: 'An error occurred while updating the chat', error: error.message});
+        return res.status(200).json(new ApiResponse(200, 'Chat updated successfully'));
+    }
+    catch (error) {
+        return res.status(500).json(new ApiError(500, 'An error occurred while updating the chat', [error.message
+        ]));
     }
 }
 
@@ -76,8 +78,8 @@ export const deleteChat = async(req, res) => {
             return res.status(400).json({message: 'ID is required'});
         }
         await sql`DELETE FROM chats WHERE id = ${id}`;
-        res.status(200).json(new ApiResponse(200, 'Chat deleted successfully'));
+        return res.status(200).json(new ApiResponse(200, 'Chat deleted successfully'));
     } catch (error) {
-        throw error;
+        return res.status(500).json(new ApiError(500, 'An error occurred while deleting the chat', [error.message]));
     }
 }

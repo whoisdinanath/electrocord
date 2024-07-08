@@ -4,9 +4,9 @@ import { ApiError, ApiResponse } from '../utils/sendResponse.js';
 export const getSubjects = async(req, res) => {
     try {
         const subjects = await sql`SELECT * FROM subjects`;
-        res.status(200).json(new ApiResponse(200, 'Subjects fetched successfully', subjects));
+        return res.status(200).json(new ApiResponse(200, 'Subjects fetched successfully', subjects));
     } catch (error) {
-        throw error;
+        return res.status(500).json(new ApiError(500, 'An error occurred while fetching subjects', [error.message]));
     }
 }
 
@@ -14,9 +14,9 @@ export const getSubjectById = async(req, res) => {
     try {
         const { id } = req.params;
         const subject = await sql`SELECT * FROM subjects WHERE subject_id = ${id}`;
-        res.status(200).json(new ApiResponse(200, 'Subject fetched successfully', subject));
+        return res.status(200).json(new ApiResponse(200, 'Subject fetched successfully', subject));
     } catch (error) {
-        throw error;
+        return res.status(500).json(new ApiError(500, 'An error occurred while fetching subject', [error.message]));
     }
 }
 
@@ -33,9 +33,9 @@ export const createSubject = async(req, res) => {
         const chat_id = result[0].id;
 
         const subject = await sql`INSERT INTO subjects (name, semester_id, syllabus, description, chat_id) VALUES (${name}, ${semester_id}, ${syllabus}, ${description}, ${chat_id}) RETURNING *`;
-        res.status(201).json(new ApiResponse(201, 'Subject created successfully', subject));
+        return res.status(201).json(new ApiResponse(201, 'Subject created successfully', subject));
     } catch (error) {
-        throw error;
+        res.status(500).json(new ApiError(500, 'An error occurred while creating the subject', [error.message]));
     }
 }
 
@@ -57,21 +57,22 @@ export const updateSubject = async(req, res) => {
           where subject_id = ${id}
         `;
 
-        res.status(200).json({message: 'Subject updated successfully'});
+        return res.status(201).json(new ApiResponse(201, 'Subject updated successfully'));
     } catch (error) {
-        res.status(500).json({message: 'An error occurred while updating the subject', error: error.message});
+        return res.status(500).json(new ApiError(500, 'An error occurred while updating the subject', [error.message]));
     }
 }
 
 export const deleteSubject = async(req, res) => {
     try {
         const { id } = req.params;
+        console.log(id);
         if (!id) {
             return res.status(400).json({message: 'ID is required'});
         }
         await sql`DELETE FROM subjects WHERE subject_id = ${id}`;
-        res.status(200).json({message: 'Subject deleted successfully'});
+        return res.status(200).json(new ApiResponse(200, 'Subject deleted successfully'));
     } catch (error) {
-        res.status(500).json({message: 'An error occurred while deleting the subject', error: error.message});
+        return res.status(500).json(new ApiError(500, 'An error occurred while deleting the subject', [error.message]));
     }
 }

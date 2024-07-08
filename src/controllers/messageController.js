@@ -1,14 +1,14 @@
 import sql from '../database/db.js'
-import { ApiResponse } from '../utils/sendResponse.js';
+import { ApiResponse, ApiError } from '../utils/sendResponse.js';
 import { formatMessages } from '../utils/formatMessage.js';
 
 export const getMessages = async (req, res) => {
     try{
     const { chat_id } = req.params;
     const messages = await sql`SELECT m.message_id as id, m.chat_id as chatId, m.sender_id as senderId, u.username as senderName, m.message,  m.created_at, m.updated_at, a.original_name, a.uploaded_name, a.file_path, a.file_type FROM messages m JOIN users u ON m.sender_id = u.user_id LEFT JOIN message_attachments a ON m.message_id = a.message_id WHERE chat_id = ${chat_id} ORDER BY m.created_at ASC`;
-    res.status(200).send(new ApiResponse(200, 'Messages fetched successfully.', formatMessages(messages)));
+    return res.status(200).send(new ApiResponse(200, 'Messages fetched successfully.', formatMessages(messages)));
     } catch(error) {
-        throw error;
+            return res.status(500).send(new ApiError(500, 'An error occurred while fetching messages.', error.message));
     }
 }
 
@@ -16,9 +16,9 @@ export const getMessageById = async (req, res) => {
     try{
     const { id } = req.params;
     const message = await sql`SELECT * FROM messages WHERE message_id = ${id}`;
-    res.status(200).send(new ApiResponse(200, 'Message fetched successfully.', message));
+    return res.status(200).send(new ApiResponse(200, 'Message fetched successfully.', message));
     } catch(error) {
-        throw error;
+         return res.status(500).send(new ApiError(500, 'An error occurred while fetching message.', error.message));
     }
 }
 
@@ -43,9 +43,9 @@ export const createMessage = async (req, res) => {
         //     }
         // }
         const created = await sql`INSERT INTO messages (chat_id, message, sender_id) VALUES (${chat_id}, ${message}, ${sender_id})`;
-        res.status(201).send(new ApiResponse(201, 'Message created successfully.', created));
+        return res.status(201).send(new ApiResponse(201, 'Message created successfully.', created));
     } catch (error) {
-        throw error;
+        return res.status(500).send(new ApiError(500, 'An error occurred while creating the message.', error.message));
     }
 }
 
@@ -63,9 +63,10 @@ export const updateMessage = async (req, res) => {
           }
           where message_id = ${id}
         `;
-        res.status(200).json({message: 'Message updated successfully'});
-    } catch (error) {
-        res.status(500).json({message: 'An error occurred while updating the message', error: error.message});
+        return res.status(201).json(new ApiResponse(201, 'Message updated successfully'));
+    }
+    catch (error) {
+        return res.status(500).json(new ApiError(500, 'An error occurred while updating the message', error.message));
     }
 }
 
@@ -76,8 +77,9 @@ export const deleteMessage = async (req, res) => {
             return res.status(400).json({message: 'ID is required'});
         }
         await sql`DELETE FROM messages WHERE message_id = ${id}`;
-        res.status(200).json({message: 'Message deleted successfully'});
-    } catch (error) {
-        res.status(500).json({message: 'An error occurred while deleting the message', error: error.message});
+        return res.status(201).json(new ApiResponse(201, 'Message deleted successfully'));
+    }
+    catch (error) {
+        return res.status(500).json(new ApiError(500, 'An error occurred while deleting the message', error.message));
     }
 }
