@@ -31,8 +31,9 @@ $delete_otp$ LANGUAGE plpgsql;
 CREATE OR REPLACE FUNCTION delete_chat_before_subject()
 RETURNS TRIGGER AS $clean_chat$
 BEGIN
-  DELETE FROM chats WHERE id=NEW.chat_id;
-  RETURN NEW;
+  RAISE NOTICE 'Deleting chat with id %', OLD.chat_id;
+  DELETE FROM chats WHERE id=OLD.chat_id;
+  RETURN OLD;
 END;
 $clean_chat$ LANGUAGE plpgsql;
 
@@ -134,7 +135,7 @@ CREATE TABLE subjects (
 );
 
 CREATE TRIGGER clean_subject_chat
-BEFORE DELETE ON subjects
+AFTER DELETE ON subjects
 FOR EACH ROW
 EXECUTE FUNCTION delete_chat_before_subject();
 
@@ -195,4 +196,3 @@ CREATE TRIGGER set_updated_at
 BEFORE UPDATE ON message_attachments
 FOR EACH ROW
 EXECUTE FUNCTION update_timestamp();
-
