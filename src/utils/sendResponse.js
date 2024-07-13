@@ -3,16 +3,25 @@ class ApiError extends Error {
         super(message);
         this.statusCode = statusCode;
         this.success = false;
-        this.details = details; // Add this line
+        this.details = details;
     }
 
     toJSON() {
-        return {
-            success: this.success,
-            statusCode: this.statusCode,
-            message: this.message,
-            details: this.details, // Include details in the JSON response
-        };
+        if (this.details.length === 0) {
+            return {
+                success: this.success,
+                statusCode: this.statusCode,
+                message: this.message,
+            };
+        }
+        else {
+            return {
+                success: this.success,
+                statusCode: this.statusCode,
+                message: this.message,
+                details: this.details,
+            };
+        }
     }
 }
 class ApiResponse {

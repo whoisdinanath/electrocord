@@ -3,6 +3,8 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
 import { ApiError, ApiResponse } from '../utils/sendResponse.js';
+import { sendMail } from '../utils/sendMail.js';
+import { generateOtp } from '../utils/generateOtp.js';
 
 dotenv.config();
 
@@ -12,34 +14,38 @@ const signUp = async (req, res) => {
         if (password1 !== password2) return res.status(400).json({ message: 'Passwords do not match' });
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(password1, salt);
-        const newUser = await sql`INSERT INTO users (username, fullname, email, dob, password, is_admin, is_moderator) VALUES (${username}, ${fullname}, ${email}, ${dob}, ${hashedPassword}, ${is_admin}, ${is_moderator}) RETURNING *`;
+        const newUser = await sql`INSERT INTO users (username, fullname, email, dob, password, is_admin, is_moderator) VALUES (${username}, ${fullname}, ${email}, ${dob}, ${hashedPassword}, ${is_admin}, ${is_moderator}) RETURNING user_id, username, email, is_admin`;
         // Note: Add secure=true during production
         if (!newUser || !newUser.length === 0) throw new Error('User not created');
-        const token = jwt.sign({ user_id: newUser[0].user_id, 
-            email: newUser[0].email,
-            username: newUser[0].username,
-            is_admin: newUser[0].is_admin,
-            is_moderator: newUser[0].is_moderator,
-            profile_pic: newUser[0].profile_pic
-         }, process.env.SECRET, { expiresIn: 86400 });
-        res.cookie('token', token, { 
-            path: "/", // accesible from all path
-            httpOnly: true, // can be accesed by client-side scripts
-            maxAge: 86400000,
-            secure: true,
-            // signed: true, // unable to parse cookie using this currently
-            SameSite: 'None'
-        }); /// cookie expires in a day
-        console.log(newUser);
-        return res.status(201).json(new ApiResponse(201, 'User created successfully', {
-            token: token,
+        const otp = generateOtp(username, newUser[0].user_id);
+        const user_otp = await sql`INSERT INTO otp (user_id, otp_code) VALUES (${newUser[0].user_id}, ${otp}) RETURNING *`;
+        const subject = 'Account Verification';
+        const html = `<p>Hi <strong>${username}</strong>,</p><p>Use this OTP to activate your account: <strong>${otp}</strong></p> <p>Regards, <br> Team Electrocord</p>`;
+        const mail = await sendMail(email, subject, html);
+        if (mail.status === 'error') throw new Error(mail.message);
+        return res.status(201).json(new ApiResponse(201, 'User created successfully, OTP sent to your email', {
+            user: newUser
         }));
     }    
         catch (error) {
-        console.log(error);
         return res.status(400).json(new ApiError(400, error.message));
     }
 };
+
+const activateAccount = async (req, res) => {
+    try {
+        const { user_id } = req.body;
+        const user = await sql`UPDATE users SET is_active = true WHERE user_id = ${user_id} RETURNING user_id, username, email, is_admin, is_active`;
+        if (!user || !user.length === 0) throw new Error('Account not activated');
+        return res.status(200).json(new ApiResponse(200, 'Account activated successfully', user));
+    }
+    catch (error) {
+        console.log(error);
+        return res.status(400).json(new ApiError(400, error.message));
+    }
+}
+
+
 
 const signIn = async (req, res) => {
     try {
@@ -77,4 +83,4 @@ const signIn = async (req, res) => {
 }
 
 
-export { signUp, signIn };
+export { signUp, signIn, activateAccount };

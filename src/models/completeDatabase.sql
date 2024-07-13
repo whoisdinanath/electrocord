@@ -48,7 +48,7 @@ CREATE TABLE users (
   profile_pic VARCHAR(255),
   is_admin BOOLEAN DEFAULT FALSE,
   is_moderator BOOLEAN DEFAULT FALSE,
-  is_active BOOLEAN DEFAULT TRUE,
+  is_active BOOLEAN DEFAULT FALSE,
   created_at TIMESTAMP DEFAULT NOW(),
   updated_at TIMESTAMP DEFAULT NOW()
 );

@@ -15,7 +15,7 @@ export const verifyToken = async (req, res, next) => {
         next();
     } catch (error) {
         if (error.name === 'JsonWebTokenError') {
-            return res.status(401).json(new ApiError(401, 'Unauthorized!'));
+            throw new ApiError(401, 'Unauthorized');
         }
         return res.status(500).json(new ApiError(500, 'Failed to authenticate token'));
     }
@@ -25,12 +25,12 @@ export const isAdmin = async (req, res, next) => {
     try {
         const [user] = await sql`SELECT * FROM users WHERE user_id = ${req.userId}`;
         if (!user) {
-            return res.status(404).json(new ApiError(404, 'User not found'));
+            throw new ApiError(404, 'User not found');
         }
         if (user.is_admin) {
             next();
         } else {
-            return res.status(403).json(new ApiError(403, 'Require Admin Role'));
+            throw new ApiError(403, 'Require Admin Role');
         }
     } catch (error) {
         console.error('isAdmin error:', error);
@@ -43,7 +43,6 @@ export const isModerator = async (req, res, next) => {
         const [user] = await sql`SELECT * FROM users WHERE user_id = ${req.userId}`;
         if (user && user.is_moderator) {
             next();
-            return;
         }
         res.status(403).json(new ApiError(403, 'Require Moderator Role'));
     }
