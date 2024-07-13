@@ -37,6 +37,14 @@ BEGIN
 END;
 $clean_chat$ LANGUAGE plpgsql;
 
+CREATE OR REPLACE FUNCTION update_expiry()
+RETURNS TRIGGER AS $update_expiry$
+BEGIN
+  NEW.expires_at = NOW() + INTERVAL '10 minutes';
+  RETURN NEW;
+END;
+$update_expiry$ LANGUAGE plpgsql;
+
 
 CREATE TABLE users (
   user_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -65,9 +73,16 @@ CREATE TABLE otp (
   otp_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   user_id UUID NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
   otp_code VARCHAR(6) NOT NULL,
+  request_type VARCHAR(255) NOT NULL CHECK(request_type IN ('signup', 'login', 'reset')),
   created_at TIMESTAMP DEFAULT NOW(),
   expires_at TIMESTAMP DEFAULT NOW() + INTERVAL '10 minutes'
 );
+
+CREATE TRIGGER set_expiry
+BEFORE UPDATE ON otp
+FOR EACH ROW
+EXECUTE FUNCTION update_expiry();
+
 
 
 
