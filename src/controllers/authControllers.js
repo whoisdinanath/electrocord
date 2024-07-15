@@ -11,27 +11,40 @@ dotenv.config();
 
 const signUp = async (req, res) => {
     try {
-        const { username, fullname, email, dob, password1, password2, is_admin=false, is_moderator=false } = req.body;
+        const { username, fullname, email, dob, password1, password2, is_admin=false, is_moderator=false } = req.body; // get the user details from the request body
+        if (!username || !fullname || !email || !dob || !password1 || !password2) throw new ApiError(400, 'username, fullname, email, dob, password1, password2 are required');
         if (password1 !== password2) throw new ApiError(400, 'Passwords do not match'); 
         const salt = await bcrypt.genSalt(10);
-        const hashedPassword = await bcrypt.hash(password1, salt);
+        const hashedPassword = await bcrypt.hash(password1, salt); // hash the password
         let profile_url = null;
+
+        // setting default profile picture if no file is uploaded
         if (!req.files || Object.keys(req.files).length === 0) {
             profile_url = 'https://electrocord.blob.core.windows.net/images/default.png';
         }
         else{
+            // uploads the profile picture to azure storage
             const uploadedFile = await uploadToAzure(req.files.profile_pic);
             if (!uploadedFile) throw new ApiError(400, 'Profile picture not uploaded');
+            // get the profile picture url
             profile_url = uploadedFile[0].filePath;
         }
+        // creating a new user
         const newUser = await sql`INSERT INTO users (username, fullname, email, dob, password, profile_pic, is_admin, is_moderator) VALUES (${username}, ${fullname}, ${email}, ${dob}, ${hashedPassword}, ${profile_url} ,${is_admin}, ${is_moderator}) RETURNING user_id, username, email, dob, profile_pic, is_admin`;
-        // Note: Add secure=true during production
+        // if user is not created, throw an error
         if (!newUser || !newUser.length === 0) throw new Error('User not created');
+        // generate an OTP for account activation
         const otp = generateOtp(username, newUser[0].user_id);
         const user_otp = await sql`INSERT INTO otp (user_id, otp_code, request_type) VALUES (${newUser[0].user_id}, ${otp}, 'signup') RETURNING *`;
+
+        // details to be sent in the email along with otp
         const subject = 'Account Verification';
         const html = `<p>Hi <strong>${username}</strong>,</p><p>Use this OTP to activate your account: <strong>${otp}</strong></p> <p>Regards, <br> Team Electrocord</p>`;
+
+        // send the email
         const mail = await sendMail(email, subject, html);
+
+        // if email is not sent, throw an error
         if (mail.status === 'error') throw new Error(mail.message);
         return res.status(201).json(new ApiResponse(201, 'User created successfully, OTP sent to your email', {
             user: newUser
@@ -45,8 +58,10 @@ const signUp = async (req, res) => {
 
 const activateAccount = async (req, res) => {
     try {
-        const { user_id } = req.body;
-        const user = await sql`UPDATE users SET is_active = true WHERE user_id = ${user_id} RETURNING user_id, username, email, is_admin, is_active`;
+        const { email } = req.body;
+
+        // set the is_active field to true to activate the account, verification done in middleware
+        const user = await sql`UPDATE users SET is_active = true WHERE email = ${email} RETURNING user_id, username, email, is_admin, is_active`;
         if (!user || !user.length === 0) throw new Error('Account not activated');
         return res.status(200).json(new ApiResponse(200, 'Account activated successfully', user));
     }
@@ -62,11 +77,15 @@ const resetPassword = async (req, res) => {
         const user = await sql`SELECT * FROM users WHERE email = ${email}`;
         if (!user || !user.length === 0) throw new ApiError(404, 'User not found');
         const { username, user_id } = user[0];
+
+        // generate an OTP for password reset
         const otp = generateOtp(username, user_id);
         const user_otp = await sql`INSERT INTO otp (user_id, otp_code, request_type) VALUES (${user_id}, ${otp}, 'reset') RETURNING *`;
         if (!user_otp || !user_otp.length === 0) throw new ApiError(400, 'OTP not generated');
         const subject = 'Password Reset';
         const html = `<p>Hi <strong>${username}</strong>,</p><p>Use this OTP to reset your password: <strong>${otp}</strong></p> <p>Regards, <br> Team Electrocord</p>`;
+
+        // send password reset email
         const mail = await sendMail(email, subject, html);
         if (mail.status === 'error') throw new Error(mail.message);
         return res.status(200).json(new ApiResponse(200, 'OTP sent to your email'));
@@ -79,17 +98,20 @@ const resetPassword = async (req, res) => {
 
 const regenerateOtp = async (req, res) => {
     try {
-        const { user_id, req_type } = req.body;
-        const user =  await sql`SELECT * FROM users WHERE user_id = ${user_id}`;
+        const { email, request_type } = req.body;
+        if (!email || !request_type) throw new ApiError(400, 'email and request_type are required');
+        const user =  await sql`SELECT * FROM users WHERE email = ${email}`;
         if (!user || !user.length === 0) throw new ApiError(404, 'User not found');
-        if (req_type === 'signup' && user[0].is_active) throw new ApiError(400, 'Account already activated');
-        const { username, email } = user[0];
+        if (request_type === 'signup' && user[0].is_active) throw new ApiError(400, 'Account already activated');
+        const { user_id, username } = user[0];
+        const otpExists = await sql`SELECT * FROM otp WHERE user_id = ${user_id} AND request_type = ${request_type}`;
+        if (!otpExists || !otpExists.length === 0) throw new ApiError(400, 'Not a valid request');
         const otp = generateOtp(username, user_id);
-        const user_otp = await sql`UPDATE otp SET otp_code = ${otp} WHERE user_id = ${user_id} AND request_type = ${req_type} RETURNING *`;
+        const user_otp = await sql`UPDATE otp SET otp_code = ${otp} WHERE user_id = ${user_id} AND request_type = ${request_type} RETURNING *`;
         if (!user_otp || !user_otp.length === 0) throw new ApiError(400, 'OTP not regenerated');
         const subject = 'Account Verification';
         let html;
-        if (req_type === 'signup') {
+        if (request_type === 'signup') {
             html = `<p>Hi <strong>${username}</strong>,</p><p>Use this OTP to activate your account: <strong>${otp}</strong></p> <p>Regards, <br> Team Electrocord</p>`;
             
         }
@@ -113,13 +135,11 @@ const changePassword = async (req, res) => {
         const user = await sql`SELECT * FROM users WHERE email = ${email}`;
         if (!user || !user.length === 0) throw new ApiError(404, 'User not found');
         if (request_type === 'reset') {
-            console.log(otp);
             const user_otp = await sql`SELECT * FROM otp WHERE user_id = ${user[0].user_id} AND request_type = ${request_type}`;
             if (user_otp.length === 0) throw new ApiError(400, `Invalid ${request_type} request`);
             if (user_otp[0].otp_code !== otp) throw new ApiError(400, 'Invalid OTP');
         }
         if (request_type === 'change') {
-            console.log(old_password);
             const passwordIsValid = await bcrypt.compare(old_password, user[0].password);
             if (!passwordIsValid) throw new ApiError(401, 'Invalid Password');
         }
@@ -140,9 +160,10 @@ const signIn = async (req, res) => {
     try {
         const { email, password } = req.body;
         const user = await sql`SELECT * FROM users WHERE email = ${email}`;
-        if (!user.length) return res.status(404).json(new ApiError(404, 'User not found'));
+        if (!user.length) throw new ApiError(404, 'User not found');
+        if (!user[0].is_active) throw new ApiError(401, 'Account not activated');
         const passwordIsValid = await bcrypt.compare(password, user[0].password);
-        if (!passwordIsValid) return res.status(401).json(new ApiError(401, 'Invalid Password'));
+        if (!passwordIsValid) throw new ApiError(401, 'Invalid Password');
         const token = jwt.sign({ user_id: user[0].user_id, 
             email: user[0].email,
             username: user[0].username,

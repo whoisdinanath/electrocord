@@ -4,7 +4,6 @@ import { ApiError } from '../utils/sendResponse.js';
 export const checkDuplicateUsernameOrEmail = async (req, res, next) => {
     try {
         const { username, email } = req.body;
-        console.log(req.body);
         const user = await sql`SELECT * FROM users WHERE username = ${username}`;
         if (user.length) throw new ApiError(400, 'The username already exists');
         const userEmail = await sql`SELECT * FROM users WHERE email = ${email}`;

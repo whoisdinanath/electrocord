@@ -18,7 +18,7 @@ const sql = postgres({
     database: PGNAME,
     username: PGUSER,
     password: PGPASS,
-    ssl: true
+    // ssl: true // Only on production
 })
 
 export default sql
