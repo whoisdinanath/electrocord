@@ -17,7 +17,8 @@ const sql = postgres({
     port: PGPORT,
     database: PGNAME,
     username: PGUSER,
-    password: PGPASS
+    password: PGPASS,
+    ssl: true
 })
 
 export default sql
