@@ -10,7 +10,7 @@ import dotenv from 'dotenv';
 dotenv.config();
 const { PGHOST, PGPORT, PGNAME, PGUSER, PGPASS } = process.env;
 
-
+const { DEPLOY } = process.env
 
 const sql = postgres({ 
     host: PGHOST,
@@ -18,7 +18,7 @@ const sql = postgres({
     database: PGNAME,
     username: PGUSER,
     password: PGPASS,
-    // ssl: true // Only on production
+    ssl: DEPLOY ? true : false
 })
 
 export default sql
