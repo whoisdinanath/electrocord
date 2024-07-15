@@ -35,6 +35,7 @@ export const createSubject = async(req, res) => {
         const subject = await sql`INSERT INTO subjects (name, semester_id, syllabus, description, chat_id) VALUES (${name}, ${semester_id}, ${syllabus}, ${description}, ${chat_id}) RETURNING *`;
         return res.status(201).json(new ApiResponse(201, 'Subject created successfully', subject));
     } catch (error) {
+        await sql`DELETE FROM chats WHERE id = ${chat_id}`;
         res.status(500).json(new ApiError(500, 'An error occurred while creating the subject', [error.message]));
     }
 }

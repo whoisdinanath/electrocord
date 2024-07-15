@@ -42,7 +42,7 @@ export const createMessage = async (req, res) => {
         //         fileArray.push(attachments.path);
         //     }
         // }
-        const created = await sql`INSERT INTO messages (chat_id, message, sender_id) VALUES (${chat_id}, ${message}, ${sender_id})`;
+        const created = await sql`INSERT INTO messages (chat_id, message, sender_id) VALUES (${chat_id}, ${message}, ${sender_id}) RETURNING *`;
         return res.status(201).send(new ApiResponse(201, 'Message created successfully.', created));
     } catch (error) {
         return res.status(500).send(new ApiError(500, 'An error occurred while creating the message.', error.message));

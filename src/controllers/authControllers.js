@@ -130,14 +130,16 @@ const regenerateOtp = async (req, res) => {
 
 const changePassword = async (req, res) => {
     try {
-        const { email, old_password=null, password1, password2, request_type=null, otp=null } = req.body;
+        const { email, old_password=null, password1, password2, request_type=null, otp_code=null } = req.body;
+        if (!email || !password1 || !password2 || !request_type) throw new ApiError(400, 'email, password1, password2, request_type are required');
+        if (request_type === 'reset' && !otp_code) throw new ApiError(400, 'Password reset OTP is required');
         if (password1 !== password2) throw new ApiError(400, 'Passwords do not match');
         const user = await sql`SELECT * FROM users WHERE email = ${email}`;
         if (!user || !user.length === 0) throw new ApiError(404, 'User not found');
         if (request_type === 'reset') {
             const user_otp = await sql`SELECT * FROM otp WHERE user_id = ${user[0].user_id} AND request_type = ${request_type}`;
             if (user_otp.length === 0) throw new ApiError(400, `Invalid ${request_type} request`);
-            if (user_otp[0].otp_code !== otp) throw new ApiError(400, 'Invalid OTP');
+            if (user_otp[0].otp_code !== otp_code) throw new ApiError(400, 'Invalid OTP');
         }
         if (request_type === 'change') {
             const passwordIsValid = await bcrypt.compare(old_password, user[0].password);
