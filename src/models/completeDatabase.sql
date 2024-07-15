@@ -73,7 +73,7 @@ CREATE TABLE otp (
   otp_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   user_id UUID NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
   otp_code VARCHAR(6) NOT NULL,
-  request_type VARCHAR(255) NOT NULL CHECK(request_type IN ('signup', 'login', 'reset')),
+  request_type VARCHAR(255) NOT NULL CHECK(request_type IN ('signup', 'login', 'reset', 'change')),
   created_at TIMESTAMP DEFAULT NOW(),
   expires_at TIMESTAMP DEFAULT NOW() + INTERVAL '10 minutes'
 );
