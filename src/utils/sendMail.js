@@ -29,7 +29,6 @@ export const sendMail = async (to, subject, html) => {
         return new ApiResponse(200, 'Email sent successfully', info);
     }
     catch (error) {
-        console.log(error);
         return new ApiError(500, 'An error occurred while sending email', error.message);
     }
 }

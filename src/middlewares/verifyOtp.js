@@ -3,7 +3,7 @@ import sql from "../database/db.js";
 
 export const verifyOtp = async (req, res, next) => {
     try {
-        const { user_id, otp_code, request_type } = req.body;
+        const { user_id, otp_code, request_type=null } = req.body;
         const [user] = await sql`SELECT * FROM users WHERE user_id = ${user_id}`;
         if (!user) {
             throw new ApiError(404, 'User not found');

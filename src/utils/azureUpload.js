@@ -2,6 +2,7 @@ import { photoContainer, videoContainer, audioContainer, documentContainer, othe
 import fs from 'fs/promises'; // Use the promise-based fs module for cleaner code
 
 export const uploadToAzure = async (req) => {
+    console.log(req.files);
     if (!req.files || req.files.length === 0) {
         throw new Error('No files were uploaded');
     }

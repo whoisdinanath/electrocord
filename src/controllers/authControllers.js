@@ -5,16 +5,26 @@ import dotenv from 'dotenv';
 import { ApiError, ApiResponse } from '../utils/sendResponse.js';
 import { sendMail } from '../utils/sendMail.js';
 import { generateOtp } from '../utils/generateOtp.js';
+import { uploadToAzure } from '../utils/azureUpload.js';
 
 dotenv.config();
 
 const signUp = async (req, res) => {
     try {
         const { username, fullname, email, dob, password1, password2, is_admin=false, is_moderator=false } = req.body;
-        if (password1 !== password2) return res.status(400).json({ message: 'Passwords do not match' });
+        if (password1 !== password2) throw new ApiError(400, 'Passwords do not match'); 
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(password1, salt);
-        const newUser = await sql`INSERT INTO users (username, fullname, email, dob, password, is_admin, is_moderator) VALUES (${username}, ${fullname}, ${email}, ${dob}, ${hashedPassword}, ${is_admin}, ${is_moderator}) RETURNING user_id, username, email, is_admin`;
+        let profile_url = null;
+        if (!req.files || Object.keys(req.files).length === 0) {
+            profile_url = 'https://electrocord.blob.core.windows.net/images/default.png';
+        }
+        else{
+            const uploadedFile = await uploadToAzure(req.files.profile_pic);
+            if (!uploadedFile) throw new ApiError(400, 'Profile picture not uploaded');
+            profile_url = uploadedFile[0].filePath;
+        }
+        const newUser = await sql`INSERT INTO users (username, fullname, email, dob, password, profile_pic, is_admin, is_moderator) VALUES (${username}, ${fullname}, ${email}, ${dob}, ${hashedPassword}, ${profile_url} ,${is_admin}, ${is_moderator}) RETURNING user_id, username, email, dob, profile_pic, is_admin`;
         // Note: Add secure=true during production
         if (!newUser || !newUser.length === 0) throw new Error('User not created');
         const otp = generateOtp(username, newUser[0].user_id);
@@ -98,18 +108,26 @@ const regenerateOtp = async (req, res) => {
 
 const changePassword = async (req, res) => {
     try {
-        const { user_id, password1, password2, request_type=null, otp=null } = req.body;
+        const { email, old_password=null, password1, password2, request_type=null, otp=null } = req.body;
         if (password1 !== password2) throw new ApiError(400, 'Passwords do not match');
-        const user = await sql`SELECT * FROM users WHERE user_id = ${user_id}`;
+        const user = await sql`SELECT * FROM users WHERE email = ${email}`;
         if (!user || !user.length === 0) throw new ApiError(404, 'User not found');
         if (request_type === 'reset') {
-            const user_otp = await sql`SELECT * FROM otp WHERE user_id = ${user_id} AND otp_code = ${otp} AND request_type = ${request_type}`;
-            if (!user_otp || !user_otp.length === 0) throw new ApiError(400, 'Invalid or expired OTP, regenerate the OTP and try again');
+            console.log(otp);
+            const user_otp = await sql`SELECT * FROM otp WHERE user_id = ${user[0].user_id} AND request_type = ${request_type}`;
+            if (user_otp.length === 0) throw new ApiError(400, `Invalid ${request_type} request`);
+            if (user_otp[0].otp_code !== otp) throw new ApiError(400, 'Invalid OTP');
+        }
+        if (request_type === 'change') {
+            console.log(old_password);
+            const passwordIsValid = await bcrypt.compare(old_password, user[0].password);
+            if (!passwordIsValid) throw new ApiError(401, 'Invalid Password');
         }
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(password1, salt);
-        const updatedUser = await sql`UPDATE users SET password = ${hashedPassword} WHERE user_id = ${user_id} RETURNING user_id, username, email, is_admin, is_active`;
-        if (!updatedUser || !updatedUser.length === 0) throw new ApiError(400, 'Password not updated');
+        const updatedUser = await sql`UPDATE users SET password = ${hashedPassword} WHERE email = ${email} RETURNING user_id, username, email, is_admin, is_active`;
+        if (!updatedUser || !updatedUser.length) throw new ApiError(400, 'Password not updated');
+        await sql`DELETE FROM otp WHERE user_id = ${user[0].user_id}`;
         return res.status(200).json(new ApiResponse(200, 'Password updated successfully', updatedUser));
     }
     catch (error) {
