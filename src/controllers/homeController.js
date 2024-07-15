@@ -1,5 +1,5 @@
-import sql from "../database/db";
-import { ApiResponse } from "../utils/sendResponse";
+import sql from "../database/db.js";
+import { ApiResponse } from "../utils/sendResponse.js";
 
 export const homePage = async (req, res) => {
     const data = {
