@@ -1,16 +1,9 @@
-import postgres from 'postgres'
+import postgres from 'postgres';
 import dotenv from 'dotenv';
 
-// const PGHOST = process.env.PGHOST
-// const PGPORT = process.env.PGPORT
-// const PGNAME = process.env.PGNAME
-// const PGUSER = process.env.PGPORT
-// const PGPASS = process.env.PGPASS
-
 dotenv.config();
-const { PGHOST, PGPORT, PGNAME, PGUSER, PGPASS } = process.env;
 
-const { DEPLOY } = process.env
+const { PGHOST, PGPORT, PGNAME, PGUSER, PGPASS, PGSSL } = process.env;
 
 const sql = postgres({ 
     host: PGHOST,
@@ -18,8 +11,7 @@ const sql = postgres({
     database: PGNAME,
     username: PGUSER,
     password: PGPASS,
-    ssl: DEPLOY ? true : false
-})
+    ssl: PGSSL === 'true' ? true : false,
+});
 
-export default sql
-
+export default sql;
