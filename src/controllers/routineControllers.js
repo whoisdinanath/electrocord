@@ -28,7 +28,7 @@ export const createRoutine = async (req, res) => {
         if (!subject_id || !day || !grp || !category || !teacher || !start_time || !end_time) {
             return res.status(400).json({message: 'Subject ID, Day, Group, Category, Teacher, Start Time and End Time are required'});
         }
-        const result = await sql`INSERT INTO routines (subject_id, day, grp, category, teacher, start_time, end_time, room_no) VALUES (${subject_id}, ${day}, ${grp}, ${category}, ${teacher}, ${start_time}, ${end_time}, ${room_no}) RETURNING *`;
+        const result = await sql`INSERT INTO routines (subject_id, day, grp, category, teacher, start_time, end_time) VALUES (${subject_id}, ${day}, ${grp}, ${category}, ${teacher}, ${start_time}, ${end_time}) RETURNING *`;
 
         return res.status(201).json(new ApiResponse(201, 'Routine created successfully', result));
     } catch (error) {
