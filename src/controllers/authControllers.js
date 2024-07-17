@@ -169,8 +169,9 @@ const signIn = async (req, res) => {
         const token = jwt.sign({ user_id: user[0].user_id, 
             email: user[0].email,
             username: user[0].username,
+            dob: user[0].dob,
             is_admin: user[0].is_admin,
-            is_moderator: user[0].is_moderator,
+            // is_moderator: user[0].is_moderator,
             profile_pic: user[0].profile_pic
          }, process.env.SECRET, { expiresIn: 86400 });
 

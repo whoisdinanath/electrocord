@@ -4,7 +4,7 @@ import { isAdmin, verifyToken } from "../middlewares/authJwt.js";
 import express from 'express';
 
 var router = express.Router();
-router.get('/',  getSubjects);
+router.get('/',verifyToken,  getSubjects);
 router.get('/:id', verifyToken, getSubjectById);
 router.post('/', verifyToken, isAdmin, createSubject);
 router.put('/:id', verifyToken, isAdmin, updateSubject);

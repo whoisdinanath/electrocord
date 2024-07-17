@@ -4,7 +4,7 @@ import { uploadToAzure } from "../utils/azureUpload.js";
 
 export const getResources = async (req, res) => {
     try {
-        const resources = await sql`SELECT * FROM resources`;
+        const resources = await sql`SELECT r.resource_id, s.subject_id, s.name, s.semester_id, s.syllabus, s.description, r.name, r.description, r.category, r.file_path, r.created_at, r.updated_at FROM resources r JOIN subjects s ON r.subject_id = s.subject_id`;
         return res.status(200).json(new ApiResponse(200, "Resources fetched successfully", resources));
     } catch (error) {
         return res.status(500).json(new ApiError(500, "An error occurred while fetching resources", [error.message]));
@@ -14,7 +14,7 @@ export const getResources = async (req, res) => {
 export const getResourceById = async (req, res) => {
     try {
         const { id } = req.params;
-        const resource = await sql`SELECT * FROM resources WHERE resource_id = ${id}`;
+        const resource = await sql`SELECT r.resource_id, s.subject_id, s.name, s.semester_id, s.syllabus, s.description, r.name, r.description, r.category, r.file_path, r.created_at, r.updated_at FROM resources r JOIN subjects s ON r.subject_id = s.subject_id WHERE r.resource_id = ${id}`;
         return res.status(200).json(new ApiResponse(200, "Resource fetched successfully", resource));
     } catch (error) {
         return res.status(500).json(new ApiError(500, "An error occurred while fetching resource", [error.message]));
