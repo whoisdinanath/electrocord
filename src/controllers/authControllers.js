@@ -59,7 +59,7 @@ const signUp = async (req, res) => {
 const activateAccount = async (req, res) => {
     try {
         const { email } = req.body;
-
+        if (!email) throw new ApiError(400, 'Email is required');
         // set the is_active field to true to activate the account, verification done in middleware
         const user = await sql`UPDATE users SET is_active = true WHERE email = ${email} RETURNING user_id, username, email, is_admin, is_active`;
         if (!user || !user.length === 0) throw new Error('Account not activated');

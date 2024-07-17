@@ -4,6 +4,9 @@ import sql from "../database/db.js";
 export const verifyOtp = async (req, res, next) => {
     try {
         const { email, otp_code, request_type=null } = req.body;
+        if (!email || !otp_code) {
+            throw new ApiError(400, 'Email and OTP code are required');
+        }
         const [user] = await sql`SELECT * FROM users WHERE email = ${email}`;
         if (!user) {
             throw new ApiError(404, 'User not found');
