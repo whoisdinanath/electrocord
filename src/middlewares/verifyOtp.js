@@ -3,12 +3,12 @@ import sql from "../database/db.js";
 
 export const verifyOtp = async (req, res, next) => {
     try {
-        const { user_id, otp_code, request_type=null } = req.body;
-        const [user] = await sql`SELECT * FROM users WHERE user_id = ${user_id}`;
+        const { email, otp_code, request_type=null } = req.body;
+        const [user] = await sql`SELECT * FROM users WHERE email = ${email}`;
         if (!user) {
             throw new ApiError(404, 'User not found');
         }
-        const user_otp = await sql`SELECT * FROM otp WHERE user_id = ${user_id} AND otp_code = ${otp_code} AND request_type = ${request_type} AND`;
+        const user_otp = await sql`SELECT * FROM otp WHERE user_id = ${user[0].user_id} AND otp_code = ${otp_code} AND request_type = ${request_type} AND`;
         if (user_otp.length === 0) {
             throw new ApiError(400, 'Incorrect OTP');
         }
