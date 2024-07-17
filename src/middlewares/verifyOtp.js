@@ -19,7 +19,7 @@ export const verifyOtp = async (req, res, next) => {
             throw new ApiError(400, 'OTP expired');
         }
         if (user_otp[0].otp_code === otp_code) {
-            await sql`DELETE FROM otp WHERE user_id = ${user_id}`;
+            await sql`DELETE FROM otp WHERE user_id = ${user[0].user_id}`;
             next();
         }
         else {
