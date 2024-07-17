@@ -3,7 +3,7 @@ import { ApiError, ApiResponse } from "../utils/sendResponse.js";
 
 export const getRoutines = async (req, res) => {
     try {
-        const routines = await sql`SELECT * FROM routines`;
+        const routines = await sql`SELECT r.id, s.subject_id, s.name, s.semester_id, r.day, r.category, r.grp, r.teacher, r.start_time, r.end_time FROM routines r JOIN subjects s ON r.subject_id = s.subject_id`;
         return res.status(201).json(new ApiResponse(201, "Routines fetched successfully", routines));
     } catch (error) {
         res.status(500).json(new ApiError(500, "An error occurred while fetching routines", [error.message]));
@@ -13,7 +13,7 @@ export const getRoutines = async (req, res) => {
 export const getRoutineById = async (req, res) => {
     try {
         const { id } = req.params;
-        const routine = await sql`SELECT * FROM routines WHERE id = ${id}`;
+        const routine = await sql`SELECT r.id, s.subject_id, s.name, s.semester_id, r.day, r.category, r.grp, r.teacher, r.start_time, r.end_time FROM routines r JOIN subjects s ON r.subject_id = s.subject_id WHERE id = ${id}`;
         return res.status(201).json(new ApiResponse(201, "Routine fetched successfully", routine));
     } catch (error) {
         res.status(500).json(new ApiError(500, "An error occurred while fetching routine", [error.message]));
