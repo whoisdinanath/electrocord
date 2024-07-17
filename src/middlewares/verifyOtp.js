@@ -7,11 +7,11 @@ export const verifyOtp = async (req, res, next) => {
         if (!email || !otp_code) {
             throw new ApiError(400, 'Email and OTP code are required');
         }
-        const [user] = await sql`SELECT * FROM users WHERE email = ${email}`;
-        if (!user) {
-            throw new ApiError(404, 'User not found');
+        const user = await sql`SELECT * FROM users WHERE email = ${email}`;
+        if (user.length === 0) {
+            throw new ApiError(400, 'User not found');
         }
-        const user_otp = await sql`SELECT * FROM otp WHERE user_id = ${user[0].user_id} AND otp_code = ${otp_code} AND request_type = ${request_type} AND`;
+        const user_otp = await sql`SELECT * FROM otp WHERE user_id = ${user[0].user_id} AND request_type = ${request_type} AND otp_code = ${otp_code}`;
         if (user_otp.length === 0) {
             throw new ApiError(400, 'Incorrect OTP');
         }
