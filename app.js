@@ -34,20 +34,23 @@ const allowedOrigins = [
   'https://sia-electrocord.vercel.app/'
 ];
 
-app.use(function (req, res, next) {
+const corsOptions = {
+  origin: (origin, callback) => {
+    // allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+  allowedHeaders: ['X-Requested-With', 'Content-Type', 'Accept'],
+  credentials: true
+};
 
-  var allowedDomains = ['http://localhost:3001','http://localhost:8080' ];
-  var origin = req.headers.origin;
-  if(allowedDomains.indexOf(origin) > -1){
-    res.setHeader('Access-Control-Allow-Origin', origin);
-  }
-
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
-  res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type, Accept');
-  res.setHeader('Access-Control-Allow-Credentials', true);
-
-  next();
-})
+// Apply CORS middleware before any other middleware or routes
+app.use(cors(corsOptions));
 
 
 app.use(logger('dev'));
