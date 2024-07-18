@@ -32,7 +32,7 @@ const allowedOrigins = ['http://localhost:3000', 'http://localhost:3001', 'https
 
 app.use(cors(
     {
-        origin: 'http://localhost:3000',
+        origin:  allowedOrigins,
         methods: ['GET', 'POST', 'PUT', 'DELETE'],
         credentials: true
     }
