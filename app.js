@@ -4,6 +4,7 @@ import { fileURLToPath } from 'url';
 import cookieParser from 'cookie-parser';
 import logger from 'morgan';
 import cors from 'cors';
+import dotenv from 'dotenv';
 
 // router imports here
 import homeRouter from './src/routes/homeRoutes.js';
@@ -17,26 +18,37 @@ import subjectRouter from './src/routes/subjectRoutes.js';
 import resourceRouter from './src/routes/resourceRoutes.js';
 import routineRouter from './src/routes/routineRoutes.js';
 import attachmentRouter from './src/routes/attachmentRoutes.js';
-import dotenv from 'dotenv';
 
 dotenv.config();
- 
-var app = express();
+
+const app = express();
 const SECRET = process.env.SECRET;
 app.use(cookieParser(SECRET));
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const allowedOrigins = ['http://localhost:3000', 'http://localhost:3001', 'https://sia-electrocord.vercel.app/']
+const allowedOrigins = [
+  'http://localhost:3000',
+  'http://localhost:3001',
+  'https://sia-electrocord.vercel.app/'
+];
 
-app.use(cors(
-    {
-        origin:  allowedOrigins,
-        methods: ['GET', 'POST', 'PUT', 'DELETE'],
-        credentials: true
+const corsOptions = {
+  origin: (origin, callback) => {
+    // allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
     }
-));
+  },
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  credentials: true
+};
+
+app.use(cors(corsOptions));
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
@@ -55,6 +67,5 @@ app.use('/api/v1/subjects', subjectRouter);
 app.use('/api/v1/resources', resourceRouter);
 app.use('/api/v1/routines', routineRouter);
 app.use('/api/v1/attachments', attachmentRouter);
-
 
 export default app;
