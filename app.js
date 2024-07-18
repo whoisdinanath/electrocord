@@ -36,7 +36,7 @@ const allowedOrigins = [
 
 app.use(function (req, res, next) {
 
-  var allowedDomains = ['http://localhost:3001','http://localhost:8080', 'https://sia-electrocord.vercel.app/' ];
+  var allowedDomains = ['http://localhost:3001','http://localhost:8080' ];
   var origin = req.headers.origin;
   if(allowedDomains.indexOf(origin) > -1){
     res.setHeader('Access-Control-Allow-Origin', origin);
@@ -48,6 +48,7 @@ app.use(function (req, res, next) {
 
   next();
 })
+
 
 app.use(logger('dev'));
 app.use(express.json());
