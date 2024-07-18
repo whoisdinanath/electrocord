@@ -50,3 +50,20 @@ export const isModerator = async (req, res, next) => {
         res.status(500).json(new ApiError(500, 'Failed to verify moderator status.'));
     }
 }
+
+// for deleting and updating user profile
+export const verifySelf = async (req, res, next) => {
+    try {
+        const { id } = req.params;
+        const user = await sql`SELECT user_id FROM users WHERE user_id = ${id}`;
+        if (!user) {
+            throw new ApiError(404, 'User not found');
+        }
+        if (id !== req.userId || !user.is_admin ) {
+            throw new ApiError(403, 'Unauthorized');
+        }
+        next();
+    } catch (error) {
+        res.status(500).json(new ApiError(500, 'Failed to verify user'));
+    }
+}
