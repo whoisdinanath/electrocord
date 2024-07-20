@@ -11,7 +11,7 @@ import homeRouter from './src/routes/homeRoutes.js';
 import usersRouter from './src/routes/userRoutes.js';
 import authRouter from './src/routes/authRoutes.js';
 import semesterRouter from './src/routes/semesterRoutes.js';
-import testRouter from './src/routes/testRoutes.js'
+import testRouter from './src/routes/testRoutes.js';
 import chatRouter from './src/routes/chatRoutes.js';
 import messageRouter from './src/routes/messageRoutes.js';
 import subjectRouter from './src/routes/subjectRoutes.js';
@@ -28,18 +28,26 @@ app.use(cookieParser(SECRET));
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-app.use(function (req, res, next) {
-  //Enabling CORS
-  res.header("Access-Control-Allow-Origin", "*");
-  res.header("Access-Control-Allow-Methods", "GET,HEAD,OPTIONS,POST,PUT");
-  res.header(
-    "Access-Control-Allow-Headers",
-    "Origin, X-Requested-With, Content-Type,Accept, x-client-key, x-client-token, x-client-secret, Authorization"
-  );
-  next();
-});
+// Define CORS options
+const allowedOrigins = [
+  'http://localhost:3000',      
+  'https://sia-electrocord.vercel.app/' 
+];
 
+const corsOptions = {
+  origin: function (origin, callback) {
+    // Check if the incoming origin is in the allowedOrigins array
+    if (allowedOrigins.indexOf(origin) !== -1 || !origin) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  methods: 'GET,HEAD,OPTIONS,POST,PUT',
+  allowedHeaders: 'Origin, X-Requested-With, Content-Type, Accept, x-client-key, x-client-token, x-client-secret, Authorization',
+};
 
+app.use(cors(corsOptions));
 
 app.use(logger('dev'));
 app.use(express.json());
