@@ -31,7 +31,7 @@ const __dirname = path.dirname(__filename);
 // Define CORS options
 const allowedOrigins = [
   'http://localhost:3000',      
-  'https://sia-electrocord.vercel.app/' 
+  'https://sia-electrocord.vercel.app' 
 ];
 
 const corsOptions = {
