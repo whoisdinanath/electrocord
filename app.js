@@ -28,21 +28,19 @@ app.use(cookieParser(SECRET));
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-
-app.all('/*', function(req, res, next) {
-  // CORS headers
-  res.header("Access-Control-Allow-Origin", "*"); // This needs to be changed to specific domains if credentials are allowed
-  res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS');
-  // Set custom headers for CORS, including cookies, authorization, and other necessary headers
-  res.header('Access-Control-Allow-Headers', 'Content-type,Accept,X-Access-Token,X-Key,Authorization');
-  // Allow credentials (cookies, authorization headers, etc.) for CORS requests
-  res.header('Access-Control-Allow-Credentials', 'true');
-  if (req.method == 'OPTIONS') {
-    res.status(200).end();
-  } else {
-    next();
-  }
+app.use(function (req, res, next) {
+  //Enabling CORS
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Methods", "GET,HEAD,OPTIONS,POST,PUT");
+  res.header(
+    "Access-Control-Allow-Headers",
+    "Origin, X-Requested-With, Content-Type,Accept, x-client-key, x-client-token, x-client-secret, Authorization"
+  );
+  next();
 });
+
+
+
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
