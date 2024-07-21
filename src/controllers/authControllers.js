@@ -177,10 +177,11 @@ const signIn = async (req, res) => {
 
 		try{
 			res.cookie('token', token,  {
-				httpOnly: true,
+				httpOnly: false,
 				maxAge: 24*60*60*1000,  
 				secure: true,
 				sameSite: "none",
+                signed: true
 			});
 		} catch(err){console.log(err);}
         // Note: Add secure=true during production

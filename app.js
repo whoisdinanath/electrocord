@@ -49,7 +49,7 @@ const corsOptions = {
     }
   },
   methods: 'GET,HEAD,OPTIONS,POST,PUT',
-  allowedHeaders: 'Origin, X-Requested-With, Content-Type, Accept, x-client-key, x-client-token, x-client-secret, Authorization, token',
+  allowedHeaders: 'Origin, Content-Type, Accept, Authorization',
   credentials: true // Enable credentials
 };
 

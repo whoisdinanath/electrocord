@@ -12,7 +12,6 @@ export const socketConnection = (socket) => {
     if (messageBatches[chatId] && messageBatches[chatId].length > 0) {
       const messages = messageBatches[chatId];
       messageBatches[chatId] = [];
-      console.log("Messages to insert:", messages);
       try {
         // Insert messages
         const insertedMessages = await sql`
@@ -20,10 +19,8 @@ export const socketConnection = (socket) => {
           VALUES ${sql(messages.map(msg => [msg.chatId, msg.senderId, msg.message]))}
           RETURNING message_id, chat_id, sender_id`;
 
-        console.log(`Inserted ${insertedMessages.length} messages for chat ${chatId}`);
 
         // Handle attachments if any
-        console.log("Attachments to insert:", attachmentBatches[chatId]);
         if (attachmentBatches[chatId] && attachmentBatches[chatId].length > 0) {
           const attachments = attachmentBatches[chatId].map(attachment => {
             const msg = insertedMessages.find(m => m.sender_id === attachment.senderId && m.chat_id === attachment.chatId);
@@ -58,7 +55,6 @@ export const socketConnection = (socket) => {
     socket.join(chatId);
     socket.joinedRoom = chatId;
     userRooms.add(chatId);
-    console.log(`User ${userId} joined chat ${chatId}`);
   });
 
   socket.on("disconnect", async () => {
