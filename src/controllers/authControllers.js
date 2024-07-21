@@ -180,7 +180,7 @@ const signIn = async (req, res) => {
             httpOnly: true, // can be accesed by client-side scripts
             maxAge: 86400000,
             secure: true,
-            // signed: true, // unable to parse cookie using this currently
+            signed: true, // unable to parse cookie using this currently
             sameSite: 'None'
         }); /// cookie expires in a day
         // Note: Add secure=true during production
