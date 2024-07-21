@@ -20,7 +20,7 @@ const signUp = async (req, res) => {
 
         // setting default profile picture if no file is uploaded
         if (!req.files || Object.keys(req.files).length === 0) {
-            profile_url = 'https://electrocord.blob.core.windows.net/images/default.png';
+            profile_url = 'https://github.com/monoastro/sia/blob/main/public/static/emma.svg';
         }
         else{
             // uploads the profile picture to azure storage
