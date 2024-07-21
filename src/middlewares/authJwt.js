@@ -9,9 +9,10 @@ export const verifyToken = async (req, res, next) => {
     const { SECRET } = process.env;
     console.log("req.cookies", req.cookies)
     try {
-        const token = req.signedCookies.token;
+        const {token} = req.cookies;
         console.log("token", token)
-        if (!token) {
+        if (!token)
+		{
             return res.status(403).json(new ApiError(403, 'No token provided'));
         }
         const decoded = jwt.verify(token, SECRET);
