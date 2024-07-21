@@ -36,21 +36,20 @@ const allowedOrigins = [
   'https://sia-electrocord.vercel.app' 
 ];
 
+
 const corsOptions = {
   origin: function (origin, callback) {
-    // Check if the incoming origin is in the allowedOrigins array
-    console.log('Origin:', origin);
     if (allowedOrigins.indexOf(origin) !== -1 || !origin) {
-      console.log('Origin:', origin);
       callback(null, true);
     } else {
       callback(new Error('Not allowed by CORS'));
     }
   },
-
   methods: 'GET,HEAD,OPTIONS,POST,PUT',
-  allowedHeaders: 'Origin, X-Requested-With, Content-Type, Accept, x-client-key, x-client-token, x-client-secret, Authorization',
+  allowedHeaders: 'Origin, X-Requested-With, Content-Type, Accept, x-client-key, x-client-token, x-client-secret, Authorization, token',
+  credentials: true // Enable credentials
 };
+
 
 app.use(cors(corsOptions));
 

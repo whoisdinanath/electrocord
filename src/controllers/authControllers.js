@@ -181,7 +181,7 @@ const signIn = async (req, res) => {
             maxAge: 86400000,
             secure: true,
             // signed: true, // unable to parse cookie using this currently
-            SameSite: 'None'
+            sameSite: 'None'
         }); /// cookie expires in a day
         // Note: Add secure=true during production
         const tokenDetails = {
@@ -194,6 +194,7 @@ const signIn = async (req, res) => {
         return res.status(400).json(new ApiError(400, 'Signin failed', [error.message]));
     }
 }
+
 
 
 export { signUp, signIn, activateAccount, regenerateOtp, resetPassword, changePassword };
