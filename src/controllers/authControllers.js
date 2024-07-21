@@ -175,14 +175,15 @@ const signIn = async (req, res) => {
             profile_pic: user[0].profile_pic
          }, process.env.SECRET, { expiresIn: 86400 });
 
-        res.cookie('token', token, { 
-            path: "/", // accesible from all path
-            httpOnly: true, // can be accesed by client-side scripts
-            maxAge: 86400000,
-            secure: true,
-            signed: true, // unable to parse cookie using this currently
-            sameSite: 'None'
-        }); /// cookie expires in a day
+		try{
+			res.cookie('token', token,  {
+				httpOnly: true,
+				maxAge: 24*60*60*1000,  
+				secure: true,
+				sameSite: "none",
+				signed: true
+			});
+		} catch(err){console.log(err);}
         // Note: Add secure=true during production
         const tokenDetails = {
             token,
