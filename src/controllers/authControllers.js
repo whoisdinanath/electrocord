@@ -20,7 +20,7 @@ const signUp = async (req, res) => {
 
         // setting default profile picture if no file is uploaded
         if (!req.files || Object.keys(req.files).length === 0) {
-            profile_url = 'https://github.com/monoastro/sia/blob/main/public/static/emma.svg';
+            profile_url = 'https://raw.githubusercontent.com/monoastro/sia/main/public/static/emma.svg';
         }
         else{
             // uploads the profile picture to azure storage
