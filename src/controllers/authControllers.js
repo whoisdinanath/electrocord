@@ -180,7 +180,7 @@ const signIn = async (req, res) => {
 				httpOnly: true,
 				maxAge: 24*60*60*1000,  
 				secure: true,
-				sameSite: 'None',
+				sameSite: 'lax',
                 signed: true
 			});
 		} catch(err){console.log(err);}
