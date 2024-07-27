@@ -175,24 +175,21 @@ const signIn = async (req, res) => {
             profile_pic: user[0].profile_pic
          }, process.env.SECRET, { expiresIn: 86400 });
 
-		try
-		{
-			res.cookie('token', token, 
-			{
+		try{
+			res.cookie('token', token,  {
 				httpOnly: true,
 				maxAge: 24*60*60*1000,  
 				secure: true,
-				sameSite: 'lax',
+				sameSite: 'None',
                 signed: true
 			});
-		} 
-		catch(err){console.log(err);}
+		} catch(err){console.log(err);}
         // Note: Add secure=true during production
         const tokenDetails = {
             token,
             expiresIn: 86400
         }
-        return res;
+        return res.status(200).json(new ApiResponse(200, 'User signed in successfully', tokenDetails));
     }
     catch (error) {
         return res.status(400).json(new ApiError(400, 'Signin failed', [error.message]));
