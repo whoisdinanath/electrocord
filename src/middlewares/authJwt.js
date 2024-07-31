@@ -7,11 +7,10 @@ dotenv.config();
 
 export const verifyToken = async (req, res, next) => {
     const { SECRET } = process.env;
-    console.log("req.cookies", req.signedCookies)
     try {
-        const {token} = req.signedCookies;
-        if (!token)
-		{
+        const token = req.cookies.token;
+        console.log("token", token)
+        if (!token) {
             return res.status(403).json(new ApiError(403, 'No token provided'));
         }
         const decoded = jwt.verify(token, SECRET);

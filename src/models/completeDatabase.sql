@@ -72,6 +72,7 @@ EXECUTE FUNCTION update_timestamp();
 CREATE TABLE otp (
   otp_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   user_id UUID NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
+  email VARCHAR(255) NOT NULL,
   otp_code VARCHAR(6) NOT NULL,
   request_type VARCHAR(255) NOT NULL CHECK(request_type IN ('signup', 'login', 'reset', 'change')),
   created_at TIMESTAMP DEFAULT NOW(),
@@ -82,8 +83,6 @@ CREATE TRIGGER set_expiry
 BEFORE UPDATE ON otp
 FOR EACH ROW
 EXECUTE FUNCTION update_expiry();
-
-
 
 
 CREATE TRIGGER delete_unused_otp
@@ -106,7 +105,7 @@ CREATE TABLE chats (
 CREATE TABLE messages (
     message_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     chat_id UUID NOT NULL REFERENCES chats(id) ON DELETE CASCADE,
-    sender_id UUID NOT NULL REFERENCES users(user_id) ON DELETE SET NULL,
+    sender_id UUID REFERENCES users(user_id) ON DELETE SET NULL,
     message TEXT NOT NULL,
     created_at TIMESTAMP DEFAULT NOW(),
     updated_at TIMESTAMP DEFAULT NOW()

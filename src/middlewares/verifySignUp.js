@@ -4,15 +4,39 @@ import { ApiError } from '../utils/sendResponse.js';
 export const checkDuplicateUsernameOrEmail = async (req, res, next) => {
     try {
         const { username, email } = req.body;
-        const user = await sql`SELECT * FROM users WHERE username = ${username}`;
-        if (user.length) throw new ApiError(400, 'The username already exists');
-        const userEmail = await sql`SELECT * FROM users WHERE email = ${email}`;
-        if (userEmail.length) return res.status(400).json(new ApiError(400, 'The email already exists'));
+
+        // Validate required fields
+        if (!username || !email) {
+            throw new ApiError(400, 'Username and email are required');
+        }
+
+        // Check for existing username
+        const [existingUser] = await sql`SELECT * FROM users WHERE username = ${username}`;
+        if (existingUser) {
+            if (existingUser.is_active) {
+                throw new ApiError(400, 'Username already exists');
+            } else {
+                await sql`DELETE FROM users WHERE username = ${username}`;
+            }
+        }
+
+        // Check for existing email
+        const [existingEmailUser] = await sql`SELECT * FROM users WHERE email = ${email}`;
+        if (existingEmailUser) {
+            if (existingEmailUser.is_active) {
+                throw new ApiError(400, 'Email already exists');
+            } else {
+                await sql`DELETE FROM users WHERE email = ${email}`;
+            }
+        }
+
         next();
     } catch (error) {
+        console.error(error);
         return res.status(400).json(new ApiError(400, error.message));
     }
-}
+};
+
 
 export const checkTcioeEmail = async (req, res, next) => {
     try {
@@ -23,6 +47,7 @@ export const checkTcioeEmail = async (req, res, next) => {
         }
         next();
     } catch (error) { 
+        console.log(error);
         return res.status(400).json(new ApiError(400, error.message, {
             hint: 'username@tcioe.edu.np'
         }));

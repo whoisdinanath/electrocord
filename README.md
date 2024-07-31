@@ -103,6 +103,6 @@ For detailed information on the project and its development, please visit the pr
 
 The project is live at:
 - [Electrocord Backend](https://electrocord.onrender.com)
-- [Electrocord Frontend](https://)
+- [Electrocord Frontend](https://sia-electrocord.vercel.app)
 
 By continuously improving Electrocord, we aim to create a powerful platform that enhances student collaboration and communication.
