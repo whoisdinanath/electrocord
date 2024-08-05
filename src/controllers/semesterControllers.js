@@ -6,7 +6,7 @@ export const getSemesters = async (req, res) => {
         const semesters = await sql`SELECT * FROM semesters`;
         return res.status(200).json(new ApiResponse(200, 'Semesters fetched successfully', semesters));
     } catch (error) {
-        return res.status(500).json(new ApiError(500, 'An error occurred while fetching semesters', [error.message]));
+        return res.status(400).json(new ApiError(400, 'An error occurred while fetching semesters', [error.message]));
     }
 }
 
@@ -16,7 +16,7 @@ export const getSemesterById = async (req, res) => {
         const semester = await sql`SELECT * FROM semesters WHERE semester_id = ${id}`;
         return res.status(200).json(new ApiResponse(200, 'Semester fetched successfully', semester));
     } catch (error) {
-        return res.status(500).json(new ApiError(500, 'An error occurred while fetching semester', [error.message]));
+        return res.status(400).json(new ApiError(400, 'An error occurred while fetching semester', [error.message]));
     }
 }
 
@@ -27,9 +27,9 @@ export const createSemester = async (req, res) => {
             return res.status(400).json(new ApiError(400, 'Semester and Description are required'));
         }
         const created = await sql`INSERT INTO semesters (semester, description) VALUES (${semester}, ${description}) RETURNING *`;
-        return res.status(201).json(new ApiResponse(201, 'Semester created successfully', created));
+        return res.status(200).json(new ApiResponse(200, 'Semester created successfully', created));
     } catch (error) {
-        return res.status(500).json(new ApiError(500, 'An error occurred while creating the semester', [error.message]));
+        return res.status(400).json(new ApiError(400, 'An error occurred while creating the semester', [error.message]));
     }
 }
 
@@ -46,9 +46,9 @@ export const updateSemester = async (req, res) => {
           }
           where semester_id = ${id} 
         `;
-        return res.status(201).json(new ApiResponse(201, 'Semester updated successfully'));
+        return res.status(200).json(new ApiResponse(200, 'Semester updated successfully'));
     } catch (error) {
-        return res.status(500).json(new ApiError(500, 'An error occurred while updating the semester', [error.message]));
+        return res.status(400).json(new ApiError(400, 'An error occurred while updating the semester', [error.message]));
     }
 }
 
@@ -58,6 +58,6 @@ export const deleteSemester = async (req, res) => {
         const deleted = await sql`DELETE FROM semesters WHERE semester_id = ${id}`;
         return res.status(200).json(new ApiResponse(200, 'Semester deleted successfully', deleted));
     } catch (error) {
-        return res.status(500).json(new ApiError(500, 'An error occurred while deleting the semester', [error.message]));
+        return res.status(400).json(new ApiError(400, 'An error occurred while deleting the semester', [error.message]));
     }
 }

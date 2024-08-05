@@ -7,7 +7,7 @@ export const getResources = async (req, res) => {
         const resources = await sql`SELECT r.resource_id, s.subject_id, s.name, s.semester_id, s.syllabus, s.description, r.name, r.description, r.category, r.file_path, r.created_at, r.updated_at FROM resources r JOIN subjects s ON r.subject_id = s.subject_id`;
         return res.status(200).json(new ApiResponse(200, "Resources fetched successfully", resources));
     } catch (error) {
-        return res.status(500).json(new ApiError(500, "An error occurred while fetching resources", [error.message]));
+        return res.status(400).json(new ApiError(400, "An error occurred while fetching resources", [error.message]));
     }
 }
 
@@ -17,7 +17,7 @@ export const getResourceById = async (req, res) => {
         const resource = await sql`SELECT r.resource_id, s.subject_id, s.name, s.semester_id, s.syllabus, s.description, r.name, r.description, r.category, r.file_path, r.created_at, r.updated_at FROM resources r JOIN subjects s ON r.subject_id = s.subject_id WHERE r.resource_id = ${id}`;
         return res.status(200).json(new ApiResponse(200, "Resource fetched successfully", resource));
     } catch (error) {
-        return res.status(500).json(new ApiError(500, "An error occurred while fetching resource", [error.message]));
+        return res.status(400).json(new ApiError(400, "An error occurred while fetching resource", [error.message]));
     }
 }
 
@@ -36,10 +36,10 @@ export const createResource = async (req, res) => {
             return res.status(400).json({message: 'Error uploading resource'});
         }
         const result = await sql`INSERT INTO resources (subject_id, name, description, category, file_path ) VALUES (${subject_id}, ${name}, ${description}, ${category}, ${resourceUrl}) RETURNING *`;
-        return res.status(201).json(new ApiResponse(201, 'Resource created successfully', result));
+        return res.status(200).json(new ApiResponse(200, 'Resource created successfully', result));
     }
     catch (error) {
-        return res.status(500).json(new ApiError(500, 'An error occurred while creating the resource', [error.message]));
+        return res.status(400).json(new ApiError(400, 'An error occurred while creating the resource', [error.message]));
     }
 }
 
@@ -71,7 +71,7 @@ export const updateResource = async (req, res) => {
     } catch (error) {
         throw error;
     } finally {
-        return res.status(500).json(new ApiError(500, 'An error occurred while updating the resource', [error.message]));
+        return res.status(400).json(new ApiError(400, 'An error occurred while updating the resource', [error.message]));
     }
 }
 
@@ -100,6 +100,6 @@ export const deleteResource = async (req, res) => {
     catch (error) {
         throw error;
     } finally {
-        return res.status(500).json(new ApiError(500, 'An error occurred while deleting the resource', [error.message]));
+        return res.status(400).json(new ApiError(400, 'An error occurred while deleting the resource', [error.message]));
     }
 }

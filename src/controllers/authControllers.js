@@ -75,7 +75,7 @@ const signUp = async (req, res) => {
         const mail = await sendMail(email, subject, html);
         if (mail.status === 'error') throw new Error(mail.message);
 
-        return res.status(201).json(new ApiResponse(201, 'User created successfully, OTP sent to your email', { user: newUser }));
+        return res.status(200).json(new ApiResponse(200, 'User created successfully, OTP sent to your email', { user: newUser }));
     } catch (error) {
         console.error(error);
         await sql`DELETE FROM users WHERE email = ${req.body.email}`;
@@ -218,7 +218,7 @@ const changePassword = async (req, res) => {
         }
         if (request_type === 'change') {
             const passwordIsValid = await bcrypt.compare(old_password, user[0].password);
-            if (!passwordIsValid) throw new ApiError(401, 'Invalid old Password');
+            if (!passwordIsValid) throw new ApiError(400, 'Invalid old Password');
         }
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(password1, salt);
@@ -239,9 +239,9 @@ const signIn = async (req, res) => {
         console.log(email);
         const user = await sql`SELECT * FROM users WHERE email = ${email}`;
         if (!user.length) throw new ApiError(404, 'User not found');
-        if (!user[0].is_active) throw new ApiError(401, 'Account not activated');
+        if (!user[0].is_active) throw new ApiError(400, 'Account not activated');
         const passwordIsValid = await bcrypt.compare(password, user[0].password);
-        if (!passwordIsValid) throw new ApiError(401, 'Invalid Password');
+        if (!passwordIsValid) throw new ApiError(400, 'Invalid Password');
         const token = jwt.sign({ user_id: user[0].user_id, 
             email: user[0].email,
             username: user[0].username,

@@ -6,6 +6,6 @@ export const uploadAttachment = async (req, res) => {
         const uploadedFiles = await uploadToAzure(req);
         return res.status(200).json(new ApiResponse(200, 'Files uploaded successfully', uploadedFiles));
     } catch (error) {
-        return res.status(500).json(new ApiError(500, 'An error occurred while uploading files', [error.message]));
+        return res.status(400).json(new ApiError(400, 'An error occurred while uploading files', [error.message]));
     }
 };

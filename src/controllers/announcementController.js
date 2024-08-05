@@ -8,7 +8,7 @@ export const getAnnouncements = async(req, res) => {
         const announcements = await sql`SELECT a.announcement_id, a.title, a.message, a.category, a.attachment, a.created_at, a.updated_at, u.username, u.fullname, u.email, u.profile_pic FROM announcements a JOIN users u ON a.user_id = u.user_id`;
         return res.status(200).json(new ApiResponse(200, 'Announcements fetched successfully', announcements));
     } catch (error) {
-        return res.status(500).json(new ApiError(500, 'An error occurred while fetching announcements', [error.message]));
+        return res.status(400).json(new ApiError(400, 'An error occurred while fetching announcements', [error.message]));
     }
 }
 
@@ -18,7 +18,7 @@ export const getAnnouncementById = async(req, res) => {
         const announcement = await sql`SELECT a.announcement_id, a.title, a.message, a.category, a.attachment, a.created_at, a.updated_at, u.username, u.fullname, u.email, u.profile_pic FROM announcements a JOIN users u ON a.user_id = u.user_id WHERE a.announcement_id = ${id}`;
         res.status(200).json(new ApiResponse(200, 'Announcement fetched successfully', announcement));
     } catch (error) {
-        res.status(500).json(new ApiError(500, 'An error occurred while fetching announcement', [error.message]));
+        res.status(400).json(new ApiError(400, 'An error occurred while fetching announcement', [error.message]));
     }
 }
 
@@ -54,7 +54,7 @@ export const createAnnouncement = async (req, res) => {
         res.status(201).json(new ApiResponse(201, 'Announcement created successfully', announcement));
     } catch (error) {
         console.error('Error creating announcement:', error);
-        return res.status(500).json(new ApiError(500, 'An error occurred while creating the announcement', [error.message]));
+        return res.status(400).json(new ApiError(400, 'An error occurred while creating the announcement', [error.message]));
     }
 };
 
@@ -84,7 +84,7 @@ export const updateAnnouncement = async(req, res) => {
         `;
         res.status(200).json(new ApiResponse(200, 'Announcement updated successfully'));
     } catch (error) {
-        res.status(500).json(new ApiError(500, 'An error occurred while updating announcement', [error.message]));
+        res.status(400).json(new ApiError(400, 'An error occurred while updating announcement', [error.message]));
     }
 }
 
@@ -98,6 +98,6 @@ export const deleteAnnouncement = async(req, res) => {
         await sql`DELETE FROM announcements WHERE announcement_id = ${id}`;
         res.status(200).json(new ApiResponse(200, 'Announcement deleted successfully'));
     } catch (error) {
-        res.status(500).json(new ApiError(500, 'An error occurred while deleting announcement', [error.message]));
+        res.status(400).json(new ApiError(400, 'An error occurred while deleting announcement', [error.message]));
     }
 }

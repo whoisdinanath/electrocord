@@ -16,7 +16,7 @@ export const getUserById = async (req, res) => {
         const user = await sql`SELECT user_id, username, email, dob , profile_pic, is_admin FROM users WHERE user_id = ${id}`;
         return res.status(200).json(new ApiResponse(200, 'User fetched successfully', user));
     } catch (error) {
-        return res.status(500).json(new ApiError(500, 'An error occurred while fetching user', [error.message]));
+        return res.status(400).json(new ApiError(400, 'An error occurred while fetching user', [error.message]));
     }
 }
 
@@ -27,7 +27,7 @@ export const deleteUser = async (req, res) => {
         if (!user || !user.length === 0) throw new Error('User not found');
         return res.status(200).json(new ApiResponse(200, 'User deleted successfully'));
     } catch (error) {
-        return res.status(500).json(new ApiError(500, 'An error occurred while deleting user', [error.message]));
+        return res.status(400).json(new ApiError(400, 'An error occurred while deleting user', [error.message]));
     }
 }
 
@@ -49,9 +49,9 @@ export const updateUser = async (req, res) => {
           where user_id = ${id}
         `;
 
-        return res.status(201).json(new ApiResponse(201, 'User updated successfully'));
+        return res.status(200).json(new ApiResponse(200, 'User updated successfully'));
     }
     catch (error) {
-        return res.status(500).json(new ApiError(500, 'An error occurred while updating user', [error.message]));
+        return res.status(400).json(new ApiError(400, 'An error occurred while updating user', [error.message]));
     }
 }
