@@ -63,3 +63,6 @@ typings/
 scripts/
 secrets
 public
+
+src/models
+!src/models/completeDatabase.sql

@@ -30,7 +30,7 @@ export const createResource = async (req, res) => {
         // this uploads the file to azure and returns the url to be saved in the database
         const upload = await uploadToAzure(req);
         // ######################## if multiple files are to be uploaded on one time change this logic, also need to add VARCHAR ARRAY IN DATABASE
-        const resourceUrl = upload[0].url;
+        const resourceUrl = upload[0].filePath;
         console.log(resourceUrl);
         if (!resourceUrl) {
             return res.status(400).json({message: 'Error uploading resource'});
@@ -57,7 +57,7 @@ export const updateResource = async (req, res) => {
         // if there's a file in request, upload it to azure and update the file path
         if (req.files) {
             const upload = await uploadToAzure(req);
-            const resourceUrl = upload[0].url;
+            const resourceUrl = upload[0].filePath;
             fieldsToUpdate.file_path = resourceUrl;
         }
 

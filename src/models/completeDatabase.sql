@@ -210,3 +210,20 @@ CREATE TRIGGER set_updated_at
 BEFORE UPDATE ON message_attachments
 FOR EACH ROW
 EXECUTE FUNCTION update_timestamp();
+
+
+CREATE TABLE announcements (
+    announcement_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id UUID NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
+    title VARCHAR(255) NOT NULL,
+    message TEXT NOT NULL,
+    attachment VARCHAR(255),
+    category VARCHAR(255) NOT NULL CHECK (category IN ('General', 'Class', 'Assignment', 'Assessment')),
+    created_at TIMESTAMP DEFAULT NOW(),
+    updated_at TIMESTAMP DEFAULT NOW()
+);
+
+CREATE TRIGGER set_updated_at
+BEFORE UPDATE ON announcements
+FOR EACH ROW
+EXECUTE FUNCTION update_timestamp();

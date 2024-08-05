@@ -18,6 +18,7 @@ import subjectRouter from './src/routes/subjectRoutes.js';
 import resourceRouter from './src/routes/resourceRoutes.js';
 import routineRouter from './src/routes/routineRoutes.js';
 import attachmentRouter from './src/routes/attachmentRoutes.js';
+import announcementRouter from './src/routes/announcementRoutes.js';
 
 dotenv.config();
 
@@ -28,7 +29,7 @@ app.use(cookieParser(SECRET));
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Define CORS options
+// // Define CORS options
 const allowedOrigins = [
   'http://localhost:3000',  
   'http://localhost:3001',
@@ -48,10 +49,11 @@ const corsOptions = {
       callback(new Error('Not allowed by CORS'));
     }
   },
-  methods: 'GET,HEAD,OPTIONS,POST,PUT',
+  methods: 'GET,HEAD,OPTIONS,POST,PUT,DELETE',
   allowedHeaders: 'Origin, Content-Type, Accept, Authorization',
   credentials: true // Enable credentials
 };
+
 
 
 app.use(cors(corsOptions));
@@ -74,5 +76,6 @@ app.use('/api/v1/subjects', subjectRouter);
 app.use('/api/v1/resources', resourceRouter);
 app.use('/api/v1/routines', routineRouter);
 app.use('/api/v1/attachments', attachmentRouter);
+app.use('/api/v1/announcements', announcementRouter);
 
 export default app;

@@ -236,6 +236,7 @@ const changePassword = async (req, res) => {
 const signIn = async (req, res) => {
     try {
         const { email, password } = req.body;
+        console.log(email);
         const user = await sql`SELECT * FROM users WHERE email = ${email}`;
         if (!user.length) throw new ApiError(404, 'User not found');
         if (!user[0].is_active) throw new ApiError(401, 'Account not activated');

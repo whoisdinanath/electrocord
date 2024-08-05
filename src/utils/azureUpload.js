@@ -2,7 +2,6 @@ import { photoContainer, videoContainer, audioContainer, documentContainer, othe
 import fs from 'fs/promises'; // Use the promise-based fs module for cleaner code
 
 export const uploadToAzure = async (req) => {
-    console.log(req.files);
     if (!req.files || req.files.length === 0) {
         throw new Error('No files were uploaded');
     }
@@ -38,7 +37,6 @@ export const uploadToAzure = async (req) => {
         try {
             // Upload file to Azure Blob Storage
             const blockBlobClient = container.getBlockBlobClient(fileName);
-            console.log('Uploading file to Azure Blob Storage:', fileName);
 
             // Upload file as a stream
             const fileStream = await fs.readFile(filePath);
@@ -60,7 +58,6 @@ export const uploadToAzure = async (req) => {
                 fileType:fileType,
             };
         } catch (error) {
-            console.error('Error uploading file to Azure Blob Storage:', error);
             throw new Error('Error uploading file to Azure Blob Storage');
         }
     });
