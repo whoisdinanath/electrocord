@@ -1,23 +1,24 @@
 import multer from 'multer';
 import path from 'path';
+import fs from 'fs';
 
-const __dirname = path.resolve()
+const __dirname = path.resolve();
 
-// file uploads are handles by multer 
+// Ensure the uploads directory exists
+const uploadsDir = path.join(__dirname, '/public/uploads');
+if (!fs.existsSync(uploadsDir)) {
+    fs.mkdirSync(uploadsDir, { recursive: true });
+}
+
+// File uploads are handled by multer
 const storage = multer.diskStorage({
     destination: (req, file, cback) => {
-        // console.log("File", file)
-        // directory to store the files
-        /* ###################################
-        Using Condition to check filetypes and uploading to specific folders needs to be implemented */
-        cback(null, path.join(__dirname, '/public/uploads'));
+        cback(null, uploadsDir);
     },
     filename: (req, file, cback) => {
         const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-        cback(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname))
+        cback(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
     }
 });
 
-
-
-export const multerUploads = multer({ storage : storage })
+export const multerUploads = multer({ storage: storage });

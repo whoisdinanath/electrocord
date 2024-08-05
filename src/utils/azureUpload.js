@@ -10,6 +10,7 @@ export const uploadToAzure = async (req) => {
     // Upload each file to Azure
     const uploadPromises = files.map(async (file) => {
         const filePath = file.path; // Get the path of the file
+        console.log('File path:', filePath);
         const fileName = file.filename; // Get filename
         const mimeType = file.mimetype; // Get the file type
         const originalName = file.originalname; // Get the original name of the file
@@ -49,7 +50,11 @@ export const uploadToAzure = async (req) => {
             const url = blockBlobClient.url;
 
             // Delete the file from the local filesystem
-            await fs.unlink(filePath);
+            if (process.env.NODE_ENV === 'development')
+            {
+                console.log('Development mode: File deleted from local filesystem');
+                await fs.unlink(filePath);  
+            }
 
             return {
                 originalName: originalName,
