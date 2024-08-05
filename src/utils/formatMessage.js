@@ -33,3 +33,50 @@ export const formatMessages = (messages) => {
     return acc;
   }, []);
 };
+export const formatSemesters = (subjects) => {
+  const semesters = subjects.reduce((acc, subject) => {
+    const { semester, semester_id, created_at, updated_at, chat_id, type, category, ...subjectDetails } = subject;
+
+    if (!acc[semester]) {
+      acc[semester] = {
+        semester,
+        semester_id,
+        created_at,
+        updated_at,
+        subjects: []
+      };
+    }
+
+    const chatDetails = {
+      chat_id,
+      type,
+      category
+    };
+
+    acc[semester].subjects.push({
+      ...subjectDetails,
+      chat: chatDetails
+    });
+
+    return acc;
+  }, {});
+
+  return Object.values(semesters);
+};
+
+export const formatSubjects = (subjects) => {
+  return subjects.map(subject => {
+    const { chat_id, type, category, ...subjectDetails } = subject;
+
+    const chatDetails = {
+      chat_id,
+      type,
+      category
+    };
+
+    return {
+      ...subjectDetails,
+      chat: chatDetails
+    };
+  });
+};

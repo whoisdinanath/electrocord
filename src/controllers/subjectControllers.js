@@ -1,9 +1,11 @@
 import sql from '../database/db.js';
 import { ApiError, ApiResponse } from '../utils/sendResponse.js';
+import { formatSubjects } from '../utils/formatMessage.js';
 
 export const getSubjects = async(req, res) => {
     try {
-        const subjects = await sql`SELECT s.subject_id, s.name, se.semester_id, se.semester, se.description, s.syllabus, s.description, c.id, c.name, c.type, c.description, c.category, s.created_at, s.updated_at  FROM subjects s JOIN semesters se ON s.semester_id = se.semester_id JOIN chats c ON s.chat_id = c.id`;
+        const data = await sql`SELECT s.subject_id, s.name, se.semester_id, se.semester, se.description, s.syllabus, s.description, c.id as chat_id, c.name, c.type, c.description, c.category, s.created_at, s.updated_at  FROM subjects s JOIN semesters se ON s.semester_id = se.semester_id JOIN chats c ON s.chat_id = c.id`;
+        const subjects = formatSubjects(data);
         return res.status(200).json(new ApiResponse(200, 'Subjects fetched successfully', subjects));
     } catch (error) {
         return res.status(400).json(new ApiError(400, 'An error occurred while fetching subjects', [error.message]));
@@ -13,7 +15,8 @@ export const getSubjects = async(req, res) => {
 export const getSubjectById = async(req, res) => {
     try {
         const { id } = req.params;
-        const subject = await sql`SELECT s.subject_id, s.name, se.semester_id, se.semester, se.description, s.syllabus, s.description, c.id, c.name, c.type, c.description, c.category, s.created_at, s.updated_at  FROM subjects s JOIN semesters se ON s.semester_id = se.semester_id JOIN chats c ON s.chat_id = c.id WHERE s.subject_id = ${id}`;
+        const data = await sql`SELECT s.subject_id, s.name, se.semester_id, se.semester, se.description, s.syllabus, s.description, c.id as chat_id, c.name, c.type, c.description, c.category, s.created_at, s.updated_at  FROM subjects s JOIN semesters se ON s.semester_id = se.semester_id JOIN chats c ON s.chat_id = c.id WHERE s.subject_id = ${id}`;
+        const subject = formatSubjects(data);
         return res.status(200).json(new ApiResponse(200, 'Subject fetched successfully', subject));
     } catch (error) {
         return res.status(400).json(new ApiError(400, 'An error occurred while fetching subject', [error.message]));

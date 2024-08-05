@@ -5,7 +5,7 @@ import { ApiError, ApiResponse } from "../utils/sendResponse.js";
 
 export const getAnnouncements = async(req, res) => {
     try {
-        const announcements = await sql`SELECT a.announcement_id, a.title, a.message, a.category, a.attachment, a.created_at, a.updated_at, u.username, u.fullname, u.email, u.profile_pic FROM announcements a JOIN users u ON a.user_id = u.user_id`;
+        const announcements = await sql`SELECT a.announcement_id, a.title, a.message, a.category, a.attachment, a.created_at, a.updated_at, u.username, u.fullname, u.email, u.profile_pic FROM announcements a JOIN users u ON a.user_id = u.user_id ORDER BY a.created_at DESC`;
         return res.status(200).json(new ApiResponse(200, 'Announcements fetched successfully', announcements));
     } catch (error) {
         return res.status(400).json(new ApiError(400, 'An error occurred while fetching announcements', [error.message]));
@@ -15,7 +15,7 @@ export const getAnnouncements = async(req, res) => {
 export const getAnnouncementById = async(req, res) => {
     try {
         const { id } = req.params;
-        const announcement = await sql`SELECT a.announcement_id, a.title, a.message, a.category, a.attachment, a.created_at, a.updated_at, u.username, u.fullname, u.email, u.profile_pic FROM announcements a JOIN users u ON a.user_id = u.user_id WHERE a.announcement_id = ${id}`;
+        const announcement = await sql`SELECT a.announcement_id, a.title, a.message, a.category, a.attachment, a.created_at, a.updated_at, u.username, u.fullname, u.email, u.profile_pic FROM announcements a JOIN users u ON a.user_id = u.user_id WHERE a.announcement_id = ${id} ORDER BY a.created_at DESC`;
         res.status(200).json(new ApiResponse(200, 'Announcement fetched successfully', announcement));
     } catch (error) {
         res.status(400).json(new ApiError(400, 'An error occurred while fetching announcement', [error.message]));
