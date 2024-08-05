@@ -34,7 +34,9 @@ const allowedOrigins = [
   'http://localhost:3000',  
   'http://localhost:3001',
   'http://localhost:3002',    
-  'https://sia-electrocord.vercel.app' 
+  'https://sia-electrocord.vercel.app',
+  'https://sia-git-announcement-monoastros-projects.vercel.app/',
+  '*.vercel.app',
 ];
 
 
