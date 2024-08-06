@@ -39,12 +39,16 @@ const signUp = async (req, res) => {
         const hashedPassword = await bcrypt.hash(password1, salt);
 
         // Set default profile picture if no file is uploaded
-        let profile_url = 'https://raw.githubusercontent.com/monoastro/sia/main/public/static/emma.svg';
+        let profile_url;
         if (req.files && Object.keys(req.files).length > 0) {
-            const uploadedFile = await uploadToAzure(req.files.profile_pic);
+            console.log('Files:', req.files);
+            const uploadedFile = await uploadToAzure(req);
             if (!uploadedFile) throw new ApiError(400, 'Profile picture not uploaded');
             profile_url = uploadedFile[0].filePath;
+        } else {
+            profile_url = 'https://raw.githubusercontent.com/monoastro/sia/main/public/static/emma.svg';
         }
+
 
         // Create new user
         const newUser = await sql`
@@ -77,7 +81,6 @@ const signUp = async (req, res) => {
 
         return res.status(200).json(new ApiResponse(200, 'User created successfully, OTP sent to your email', { user: newUser }));
     } catch (error) {
-        console.error(error);
         await sql`DELETE FROM users WHERE email = ${req.body.email}`;
         return res.status(400).json(new ApiError(400, error.message));
     }
@@ -95,7 +98,6 @@ const activateAccount = async (req, res) => {
         return res.status(200).json(new ApiResponse(200, 'Account activated successfully', user));
     }
     catch (error) {
-        console.log(error);
         return res.status(400).json(new ApiError(400, error.message));
     }
 }
@@ -268,7 +270,7 @@ const signIn = async (req, res) => {
         return res.status(200).json(new ApiResponse(200, 'User signed in successfully', tokenDetails));
     }
     catch (error) {
-        return res.status(400).json(new ApiError(400, 'Signin failed', [error.message]));
+        return res.status(400).json(new ApiError(400, error.message));
     }
 }
 

@@ -1,5 +1,6 @@
 import sql from '../database/db.js';
 import { ApiError, ApiResponse } from '../utils/sendResponse.js';
+import { uploadToAzure } from '../utils/azureUpload.js';
 
 export const getUsers = async (req, res) => {
     try {
@@ -40,6 +41,15 @@ export const updateUser = async (req, res) => {
         if (!id || Object.keys(fieldsToUpdate).length === 0) {
             return res.status(400).json({ message: 'ID and at least one field to update are required' });
         }
+
+        let profileUrl;
+
+        if (req.files && req.files.length > 0) {
+            const profilePic = await uploadToAzure(req);
+            profileUrl = profilePic[0].filePath;
+            fieldsToUpdate.profile_pic = profileUrl;
+        }
+
 
         // Construct and execute the UPDATE query dynamically
         await sql`
