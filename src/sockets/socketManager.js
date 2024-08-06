@@ -3,27 +3,30 @@ import { socketConnection } from './socketHandler.js'; // Adjust the path as nec
 import { authenticateSocket } from '../middlewares/socketAuth.js';
 
 const allowedOrigins = [
-    'https://sia-electrocord.vercel.app/',
-    'http://localhost:3001',
-    'http://localhost:3000',
-    '*'
+  'http://localhost:3000',  
+  'http://localhost:3001',
+  'http://localhost:3002',    
+  'https://sia-electrocord.vercel.app',
+  'https://sia-git-announcement-monoastros-projects.vercel.app',
+  '*',
 ];
 
 export const initializeSockets = (server) => {
     const io = new Server(server, {
         cors: {
-            origin: (origin, callback) => {
-                // allow requests with no origin (like mobile apps or curl requests)
-                if (!origin) return callback(null, true);
-                if (allowedOrigins.indexOf(origin) !== -1) {
-                    callback(null, true);
-                } else {
-                    callback(new Error('Not allowed by CORS'));
-                }
+            origin: function (origin, callback) {
+            if (allowedOrigins.indexOf(origin) !== -1 || !origin) 
+	        {
+                callback(null, true);
+            }
+	        else
+	        {
+                callback(new Error('Not allowed by CORS'));
+            }
             },
-            methods: ['GET', 'POST', 'PUT', 'DELETE'],
-            allowedHeaders: ['Origin', 'Content-Type', 'Accept', 'Authorization'],
-            credentials: true
+            methods: 'GET,HEAD,OPTIONS,POST,PUT,DELETE',
+            allowedHeaders: 'Origin, Content-Type, Accept, Authorization',
+            credentials: true // Enable credentials
         }
     });
 
