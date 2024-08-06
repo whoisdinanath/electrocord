@@ -33,7 +33,6 @@ export const formatMessages = (messages) => {
     return acc;
   }, []);
 };
-
 export const formatSubjects = (input) => {
   const organizedData = {};
 
@@ -53,7 +52,10 @@ export const formatSubjects = (input) => {
       resource_category, 
       file_path, 
       resource_created, 
-      resource_updated 
+      resource_updated,
+      chat_id,
+      type,
+      category 
     } = item;
 
     // Initialize the subject if it doesn't exist
@@ -67,6 +69,11 @@ export const formatSubjects = (input) => {
         updated_at,
         semester,
         semester_id,
+        chat: {
+          chat_id,
+          type,
+          category
+        },
         resources: []
       };
     }
@@ -114,6 +121,11 @@ export const formatSemesters = (input) => {
                 name: item.name,
                 description: item.description,
                 syllabus: item.syllabus,
+                chat: {
+                  chat_id: item.chat_id,
+                  type: item.type,
+                  category: item.category
+                },
                 resources: []
             };
             organizedData[semesterId].subjects.push(subject);
