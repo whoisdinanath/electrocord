@@ -51,7 +51,7 @@ export const createAnnouncement = async (req, res) => {
             RETURNING *
         `;
 
-        res.status(201).json(new ApiResponse(201, 'Announcement created successfully', announcement));
+        res.status(200).json(new ApiResponse(200, 'Announcement created successfully', announcement));
     } catch (error) {
         console.error('Error creating announcement:', error);
         return res.status(400).json(new ApiError(400, 'An error occurred while creating the announcement', [error.message]));
