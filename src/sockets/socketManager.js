@@ -3,9 +3,9 @@ import { socketConnection } from './socketHandler.js'; // Adjust the path as nec
 import { authenticateSocket } from '../middlewares/socketAuth.js';
 
 const allowedOrigins = [
+    'https://sia-electrocord.vercel.app/',
     'http://localhost:3001',
     'http://localhost:3000',
-    'https://sia-electrocord.vercel.app/',
     '*'
 ];
 
@@ -22,6 +22,7 @@ export const initializeSockets = (server) => {
                 }
             },
             methods: ['GET', 'POST', 'PUT', 'DELETE'],
+            allowedHeaders: ['Origin', 'Content-Type', 'Accept', 'Authorization'],
             credentials: true
         }
     });
