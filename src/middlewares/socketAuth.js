@@ -10,7 +10,7 @@ export const authenticateSocket = async (socket, next) => {
     const token = socket.handshake.auth.token;
     if (!token) throw new Error('Unauthorized');
     const decoded = jwt.verify(token, SECRET);
-    socket.userId = decoded.id;
+    socket.userId = decoded.user_id;
     next();
   } catch (error) {
     if (error.name === 'JsonWebTokenError') {

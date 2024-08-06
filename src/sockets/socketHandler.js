@@ -68,7 +68,6 @@ export const socketConnection = (socket) => {
     socket.leave(chatId);
     userRooms.delete(chatId);
     await insertMessagesAndAttachmentsToDB(chatId); // Insert remaining messages for the room
-    console.log(`User ${userId} left room ${chatId}`);
   });
 
   socket.on("chatMessage", (data) => {
