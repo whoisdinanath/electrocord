@@ -251,7 +251,7 @@ const signIn = async (req, res) => {
             is_admin: user[0].is_admin,
             // is_moderator: user[0].is_moderator,
             profile_pic: user[0].profile_pic
-         }, process.env.SECRET, { expiresIn: 86400 });
+         }, process.env.SECRET, { expiresIn: 86400*10 });
 
 		try{
 			res.cookie('token', token,  {

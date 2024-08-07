@@ -18,7 +18,7 @@ export const socketConnection = (socket) => {
           INSERT INTO messages (chat_id, sender_id, message)
           VALUES ${sql(messages.map(msg => [msg.chatId, msg.senderId, msg.message]))}
           RETURNING message_id, chat_id, sender_id`;
-
+        console.log(`Inserted ${insertedMessages.length} messages for chat ${chatId}`);
 
         // Handle attachments if any
         if (attachmentBatches[chatId] && attachmentBatches[chatId].length > 0) {
@@ -71,14 +71,17 @@ export const socketConnection = (socket) => {
   });
 
   socket.on("chatMessage", (data) => {
-    const { chatId, senderId, senderName, message, attachments = [] } = data;
-    socket.to(chatId).emit("chatMessage", { chatId, senderId, senderName, message, attachments });
+    const { chatId, senderId, senderName, senderProfile, message, attachments, createdAt = [] } = data;
+    socket.to(chatId).emit("chatMessage", { chatId, senderId, senderName, senderProfile, message, attachments, createdAt });
+    // print the emitted message to the console
+    console.log(`Message from ${senderName} in chat ${chatId}: ${message}, ${senderId}, ${senderProfile}, ${attachments}`);
+
 
     // Add message to the batch
     if (!messageBatches[chatId]) {
       messageBatches[chatId] = [];
     }
-    messageBatches[chatId].push({ chatId, senderId, senderName, message });
+    messageBatches[chatId].push({ chatId, senderId, senderProfile,  senderName, message, createdAt });
 
     // Add attachments to the batch
     if (attachments.length > 0) {
