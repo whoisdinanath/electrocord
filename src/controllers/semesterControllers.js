@@ -4,7 +4,7 @@ import { formatSemesters } from '../utils/formatMessage.js';
 
 export const getSemesters = async (req, res) => {
     try {
-        const semesters = await sql`SELECT s.subject_id, s.name, r.resource_id, r.name as resource_name, r.description as resource_description, r.category as resource_category, r.file_path, r.created_at as resource_created, r.updated_at as resource_updated, se.semester_id, se.semester, se.description, s.syllabus, s.description, c.id as chat_id, c.name, c.type, c.description, c.category, s.created_at, s.updated_at  FROM subjects s JOIN semesters se ON s.semester_id = se.semester_id JOIN chats c ON s.chat_id = c.id LEFT JOIN resources r ON r.subject_id = s.subject_id`;
+        const semesters = await sql`SELECT s.subject_id, s.name, r.resource_id, r.name as resource_name, r.description as resource_description, r.category as resource_category, r.file_path, r.created_at as resource_created, r.updated_at as resource_updated, se.semester_id, se.semester, se.description, s.syllabus, s.description, c.id as chat_id, c.name, c.type, c.description, c.category, s.created_at, s.updated_at  FROM subjects s JOIN semesters se ON s.semester_id = se.semester_id JOIN chats c ON s.chat_id = c.id LEFT JOIN resources r ON r.subject_id = s.subject_id ORDER BY se.semester ASC`;
         const formattedSemesters = formatSemesters(semesters);
         return res.status(200).json(new ApiResponse(200, 'Semesters fetched successfully', formattedSemesters));
     } catch (error) {
@@ -12,11 +12,21 @@ export const getSemesters = async (req, res) => {
     }
 }
 
+export const getSemestersEach = async (req, res) => {
+    try {
+        const semesters = await sql`SELECT * FROM semesters`;
+        return res.status(200).json(new ApiResponse(200, 'Semesters fetched successfully', semesters));
+    } catch (error) {
+        return res.status(400).json(new ApiError(400, 'An error occurred while fetching semesters', [error.message]));
+    }
+}
+
+
 export const getSemesterById = async (req, res) => {
     try {
         const { id } = req.params;
         // get the semester and all subjects in that semester
-        const semester = await sql`SELECT s.subject_id, s.name, r.resource_id, r.name as resource_name, r.description as resource_description, r.category as resource_category, r.file_path, r.created_at as resource_created, r.updated_at as resource_updated, se.semester_id, se.semester, se.description, s.syllabus, s.description, c.id as chat_id, c.name, c.type, c.description, c.category, s.created_at, s.updated_at  FROM subjects s JOIN semesters se ON s.semester_id = se.semester_id JOIN chats c ON s.chat_id = c.id LEFT JOIN resources r ON r.subject_id = s.subject_id WHERE se.semester_id = ${id}`;
+        const semester = await sql`SELECT s.subject_id, s.name, r.resource_id, r.name as resource_name, r.description as resource_description, r.category as resource_category, r.file_path, r.created_at as resource_created, r.updated_at as resource_updated, se.semester_id, se.semester, se.description, s.syllabus, s.description, c.id as chat_id, c.name, c.type, c.description, c.category, s.created_at, s.updated_at  FROM subjects s JOIN semesters se ON s.semester_id = se.semester_id JOIN chats c ON s.chat_id = c.id LEFT JOIN resources r ON r.subject_id = s.subject_id WHERE se.semester_id = ${id} ORDER BY se.semester ASC`;
         const formattedSemester = formatSemesters(semester);
         return res.status(200).json(new ApiResponse(200, 'Semester fetched successfully', formattedSemester));
     } catch (error) {

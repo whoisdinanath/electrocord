@@ -12,6 +12,25 @@ export const getSubjects = async(req, res) => {
     }
 }
 
+export const getSubjectsEach = async(req, res) => {
+    try {
+        const subjects = await sql`SELECT * FROM subjects`;
+        return res.status(200).json(new ApiResponse(200, 'Subjects fetched successfully', subjects));
+    } catch (error) {
+        return res.status(400).json(new ApiError(400, 'An error occurred while fetching subjects', [error.message]));
+    }
+}
+
+export const getSubjectsBySemester = async(req, res) => {
+    try {
+        const { id } = req.params;
+        const data = await sql`SELECT s.subject_id, s.name, se.semester_id, se.semester, se.description, s.syllabus, s.description, s.created_at, s.updated_at  FROM subjects s JOIN semesters se ON s.semester_id = se.semester_id WHERE se.semester_id = ${id}`;
+        return res.status(200).json(new ApiResponse(200, 'Subjects fetched successfully', data));
+    } catch (error) {
+        return res.status(400).json(new ApiError(400, 'An error occurred while fetching subjects', [error.message]));
+    }
+}
+
 export const getSubjectById = async(req, res) => {
     try {
         const { id } = req.params;

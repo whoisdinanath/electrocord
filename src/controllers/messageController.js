@@ -5,7 +5,7 @@ import { formatMessages } from '../utils/formatMessage.js';
 export const getMessages = async (req, res) => {
     try{
     const { chat_id } = req.params;
-    const messages = await sql`SELECT m.message_id as id, m.chat_id as chatId, m.sender_id as senderId, u.username as senderName, u.profile_pic as senderProfile,  m.message,  m.created_at, m.updated_at, a.original_name, a.uploaded_name, a.file_path, a.file_type FROM messages m JOIN users u ON m.sender_id = u.user_id LEFT JOIN message_attachments a ON m.message_id = a.message_id WHERE chat_id = ${chat_id} ORDER BY m.created_at ASC`;
+    const messages = await sql`SELECT m.message_id as id, m.chat_id as chatId, m.sender_id as senderId, u.username as senderName, u.profile_pic as senderProfile,  m.message,  m.created_at, m.updated_at, a.original_name, a.uploaded_name, a.file_path, a.file_type FROM messages m JOIN users u ON m.sender_id = u.user_id LEFT JOIN message_attachments a ON m.message_id = a.message_id WHERE chat_id = ${chat_id} ORDER BY m.created_at DESC`;
     return res.status(200).send(new ApiResponse(200, 'Messages fetched successfully.', formatMessages(messages)));
     } catch(error) {
             return res.status(400).send(new ApiError(400, 'An error occurred while fetching messages.', error.message));
@@ -15,12 +15,44 @@ export const getMessages = async (req, res) => {
 export const getMessageById = async (req, res) => {
     try{
     const { id } = req.params;
-    const message = await sql`SELECT m.message_id as id, m.chat_id as chatId, m.sender_id as senderId, u.username as senderName, u.profile_pic as senderProfile,  m.message,  m.created_at, m.updated_at, a.original_name, a.uploaded_name, a.file_path, a.file_type FROM messages m JOIN users u ON m.sender_id = u.user_id LEFT JOIN message_attachments a ON m.message_id = a.message_id WHERE message_id = ${id}`;
+    const message = await sql`SELECT m.message_id as id, m.chat_id as chatId, m.sender_id as senderId, u.username as senderName, u.profile_pic as senderProfile,  m.message,  m.created_at, m.updated_at, a.original_name, a.uploaded_name, a.file_path, a.file_type FROM messages m JOIN users u ON m.sender_id = u.user_id LEFT JOIN message_attachments a ON m.message_id = a.message_id WHERE message_id = ${id} ORDER BY m.created_at DESC`;
     return res.status(200).send(new ApiResponse(200, 'Message fetched successfully.', message));
     } catch(error) {
          return res.status(400).send(new ApiError(400, 'An error occurred while fetching message.', error.message));
     }
 }
+
+export const getMessagePaginated = async (req, res) => {
+    try {
+        const { chat_id } = req.params;
+        const { page = 1, limit = 15 } = req.query; // default page 1 and limit 15
+
+        const offset = (page - 1) * limit;  // offset calculation , which page and how many messages per page
+        const messages = await sql`
+            SELECT m.message_id as id, m.chat_id as chatId, m.sender_id as senderId, 
+                   u.username as senderName, u.profile_pic as senderProfile,  
+                   m.message, m.created_at, m.updated_at, 
+                   a.original_name, a.uploaded_name, a.file_path, a.file_type 
+            FROM messages m 
+            JOIN users u ON m.sender_id = u.user_id 
+            LEFT JOIN message_attachments a ON m.message_id = a.message_id 
+            WHERE chat_id = ${chat_id} 
+            ORDER BY m.created_at DESC 
+            LIMIT ${limit} OFFSET ${offset}`;
+
+        const totalMessages = await sql`SELECT COUNT(*) FROM messages WHERE chat_id = ${chat_id}`;
+
+        return res.status(200).send(new ApiResponse(200, 'Messages fetched successfully.', {
+            messages: formatMessages(messages),
+            currentPage: parseInt(page),
+            totalPages: Math.ceil(totalMessages[0].count / limit),
+            totalMessages: totalMessages[0].count
+        }));
+    } catch (error) {
+        return res.status(400).send(new ApiError(400, 'An error occurred while fetching messages.', error.message));
+    }
+}
+
 
 export const createMessage = async (req, res) => {
     try{
