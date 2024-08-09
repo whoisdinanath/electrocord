@@ -46,7 +46,7 @@ Follow these steps to set up Electrocord on your local machine:
     git clone https://github.com/whoisdinanath/Electrocord.git
     ```
 
-2. Create a PostgreSQL database and run the SQL scripts provided in the `models/completeDatabase.sql` file to set up the required tables and data.
+2. Create a PostgreSQL database and run the SQL queries provided in the `models/completeDatabase.sql` file to set up the required tables and data.
 
 3. Create a `.env` file in the root directory of the project and add the environment variables listed in the `.env.example` file.
 
@@ -63,6 +63,15 @@ Follow these steps to set up Electrocord on your local machine:
 ## Usage
 
 After successfully starting the server, open your preferred web browser and go to `http://localhost:5000` or the port you set in `.env`. From here, you can register a new account or log in with an existing one to explore all the features Electrocord has to offer.
+All the API endpoints are available at respective routes, and you can access them using tools like Postman or Insomnia.
+
+
+## Issues Encountered
+
+- **No ORM Allowed**: The project required us to use raw SQL queries instead of an ORM, which made the database operations more complex and time-consuming.
+- **Real-Time Communication**: Implementing real-time chat functionality using WebSockets was challenging due to the need for efficient message handling and synchronization.
+- **User Authentication**: Ensuring secure user authentication and session management was crucial to protect user data and privacy.
+- **Short Timeframe**: Developing a feature-rich communication platform within a limited timeframe required careful planning and prioritization of tasks.
 
 ## Contributing
 
@@ -71,6 +80,7 @@ We welcome contributions to Electrocord! If you have suggestions for improvement
 ## License
 
 Electrocord is released under the [MIT License](LICENSE). Feel free to use, modify, and distribute the code as per the license conditions.
+
 
 ## Acknowledgments
 
