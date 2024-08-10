@@ -21,6 +21,16 @@ export const getResourceById = async (req, res) => {
     }
 }
 
+export const getResourcesBySubject = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const resources = await sql`SELECT r.resource_id, s.name as subject_name, s.semester_id, s.description, r.name, r.description, r.category, r.file_path, r.created_at, r.updated_at FROM resources r JOIN subjects s ON r.subject_id = s.subject_id WHERE s.subject_id = ${id}`;
+        return res.status(200).json(new ApiResponse(200, "Resources fetched successfully", resources));
+    } catch (error) {
+        return res.status(400).json(new ApiError(400, "An error occurred while fetching resources", [error.message]));
+    }
+}
+
 export const createResource = async (req, res) => {
     try{
         const { subject_id, name, description = null, category } = req.body;
