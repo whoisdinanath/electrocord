@@ -50,12 +50,6 @@ export const updateUser = async (req, res) => {
                 return res.status(400).json(new ApiError(400, 'Username already exists'));
             }
         }
-        if (fieldsToUpdate.email) {
-            const [existingUser] = await sql`SELECT * FROM users WHERE email = ${fieldsToUpdate.email}`;
-            if (existingUser) {
-                return res.status(400).json(new ApiError(400, 'Email already exists'));
-            }
-        }
 
         //username must be alphanumeric
         if (fieldsToUpdate.username) {
