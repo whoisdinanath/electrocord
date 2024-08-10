@@ -35,8 +35,11 @@ export const deleteUser = async (req, res) => {
 export const updateUser = async (req, res) => {
     try {
         const { id } = req.params;
-        const { username, dob } = req.body;
-        const fieldsToUpdate = { username, dob };
+        const fieldsToUpdate = req.body;
+        // remove email from fields to update if the user is not an admin
+        if (!req.user.is_admin) {
+            delete fieldsToUpdate.email;
+        }
 
         // Validate inputs
         if (!id || Object.keys(fieldsToUpdate).length === 0) {

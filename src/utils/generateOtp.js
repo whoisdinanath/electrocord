@@ -9,7 +9,8 @@ const getTimestampInSeconds = () => {
 export const generateOtp = (username, id) => {
   const timestamp = getTimestampInSeconds();
   // const secret = process.env.OTP_SECRET || 'default_secret'; // Fallback secret
-  const baseString = `${username}_${id}_${timestamp}`;
+  const secret = process.env.SECRET;
+  const baseString = `${username}_${id}_${timestamp}_${secret}`;
   const hash = bcrypt.hashSync(baseString, 10);
   // Convert the hash to a large integer using a simple hash function
   let hashValue = 0;
