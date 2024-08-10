@@ -68,6 +68,8 @@ export const verifySelf = async (req, res, next) => {
         if (id !== req.userId && !user.is_admin) {
             return res.status(403).json(new ApiError(403, 'Unauthorized'));
         }
+        req.is_admin = user.is_admin;
+        console.log('verifySelf:', req.is_admin);
         next();
     } catch (error) {
         console.error('verifySelf error:', error);

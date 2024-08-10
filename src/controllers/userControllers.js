@@ -37,7 +37,7 @@ export const updateUser = async (req, res) => {
         const { id } = req.params;
         const fieldsToUpdate = req.body;
         // remove email from fields to update if the user is not an admin
-        if (!req.user.is_admin) {
+        if (!req.is_admin) {
             delete fieldsToUpdate.email;
         }
 
