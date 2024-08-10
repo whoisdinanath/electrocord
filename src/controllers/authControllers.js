@@ -22,6 +22,15 @@ const signUp = async (req, res) => {
             throw new ApiError(400, 'username, fullname, email, dob, password1, password2 are required');
         }
 
+        if (password1.length < 6) {
+            throw new ApiError(400, 'Password must be at least 6 characters');
+        }
+
+        //username must be alphanumeric
+        if (!/^[a-zA-Z0-9]+$/.test(username)) {
+            throw new ApiError(400, 'Username must be alphanumeric');
+        }
+
         // Validate password match
         if (password1 !== password2) {
             throw new ApiError(400, 'Passwords do not match');

@@ -41,6 +41,28 @@ export const updateUser = async (req, res) => {
             delete fieldsToUpdate.email;
         }
 
+        
+
+        //  unique and not empty
+        if (fieldsToUpdate.username) {
+            const [existingUser] = await sql`SELECT * FROM users WHERE username = ${fieldsToUpdate.username}`;
+            if (existingUser) {
+                return res.status(400).json(new ApiError(400, 'Username already exists'));
+            }
+        }
+        if (fieldsToUpdate.email) {
+            const [existingUser] = await sql`SELECT * FROM users WHERE email = ${fieldsToUpdate.email}`;
+            if (existingUser) {
+                return res.status(400).json(new ApiError(400, 'Email already exists'));
+            }
+        }
+
+        //username must be alphanumeric
+        if (fieldsToUpdate.username) {
+            if (!/^[a-zA-Z0-9]+$/.test(fieldsToUpdate.username)) {
+                return res.status(400).json(new ApiError(400, 'Username must be alphanumeric'));
+            }
+        }
         // Validate inputs
         if (!id || Object.keys(fieldsToUpdate).length === 0) {
             return res.status(400).json({ message: 'ID and at least one field to update are required' });
