@@ -57,6 +57,14 @@ export const updateUser = async (req, res) => {
                 return res.status(400).json(new ApiError(400, 'Username must be alphanumeric'));
             }
         }
+
+        // username must not be empty, and must not contain spaces
+        if (fieldsToUpdate.username) {
+            if (!fieldsToUpdate.username || fieldsToUpdate.username.trim().length === 0) {
+                return res.status(400).json(new ApiError(400, 'Username must not be empty'));
+            }
+        }
+
         // Validate inputs
         if (!id || Object.keys(fieldsToUpdate).length === 0) {
             return res.status(400).json({ message: 'ID and at least one field to update are required' });
