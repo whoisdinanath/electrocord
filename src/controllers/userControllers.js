@@ -45,7 +45,7 @@ export const updateUser = async (req, res) => {
 
         //  unique and not empty
         if (fieldsToUpdate.username) {
-            const [existingUser] = await sql`SELECT * FROM users WHERE username = ${fieldsToUpdate.username}`;
+            const [existingUser] = await sql`SELECT * FROM users WHERE username = ${fieldsToUpdate.username} AND user_id != ${id}`;
             if (existingUser) {
                 return res.status(400).json(new ApiError(400, 'Username already exists'));
             }
