@@ -268,7 +268,8 @@ const signIn = async (req, res) => {
 				maxAge: 24*60*60*1000,  
 				secure: true,
 				sameSite: 'None',
-                signed: true
+                signed: true,
+				partitioned: true
 			});
 		} catch(err){console.log(err);}
         // Note: Add secure=true during production
