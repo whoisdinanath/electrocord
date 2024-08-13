@@ -105,7 +105,7 @@ CREATE TABLE chats (
 CREATE TABLE messages (
     message_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     chat_id UUID NOT NULL REFERENCES chats(id) ON DELETE CASCADE,
-    sender_id UUID REFERENCES users(user_id) ON DELETE SET NULL,
+    sender_id UUID REFERENCES users(user_id) ON DELETE CASCADE,
     message TEXT NOT NULL,
     created_at TIMESTAMP DEFAULT NOW(),
     updated_at TIMESTAMP DEFAULT NOW()
