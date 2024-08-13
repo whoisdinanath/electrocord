@@ -267,7 +267,7 @@ const signIn = async (req, res) => {
 				httpOnly: true,
 				maxAge: 24*60*60*1000,  
 				secure: true,
-				sameSite: 'None',
+				sameSite: 'none',
                 signed: true
 			});
 		} catch(err){console.log(err);}
